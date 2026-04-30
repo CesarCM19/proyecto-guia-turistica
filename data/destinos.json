@@ -1,188 +1,46 @@
 {
   "destinos": [
     {
-    "id": "caribe-001",
-    "nombre": "Cahuita",
-    "region": "Caribe",
-    "descripcion": "Cahuita es un pintoresco pueblo costero en el Caribe Sur de Costa Rica, famoso por su Parque Nacional que protege uno de los arrecifes de coral más importantes del país. Sus aguas cálidas y cristalinas albergan una rica vida marina, mientras que sus playas de arena oscura y vegetación exuberante ofrecen un paisaje único. La cultura afrocaribeña del lugar se refleja en su música, gastronomía y la calidez de sus habitantes.",
-    "imagen_portada": "assets/img/cahuita-portada.jpg",
-    "galeria": [
-      "assets/img/cahuita-1.jpg",
-      "assets/img/cahuita-2.jpg",
-      "assets/img/cahuita-3.jpg"
-    ],
-    "audio": "assets/audio/cahuita-guia.mp3",
-    "video": "assets/video/cahuita.mp4",
-    "actividades": [
-      "Snorkel",
-      "Senderismo",
-      "Observación de fauna",
-      "Natación",
-      "Fotografía de naturaleza"
-    ],
-    "lat": 9.7369,
-    "lng": -82.8411
-  },
-  {
-    "id": "caribe-002",
-    "nombre": "Puerto Viejo",
-    "region": "Caribe",
-    "descripcion": "Puerto Viejo de Talamanca es uno de los destinos más vibrantes del Caribe costarricense. Conocido por su animada cultura rastafari y afrocaribeña, este pueblo ofrece excelentes olas para surf, playas como Playa Cocles y Manzanillo, y la posibilidad de avistar al perezoso de dos dedos en los árboles del camino. Su gastronomía con influencias jamaicanas es imperdible.",
-    "imagen_portada": "assets/img/puerto-viejo-portada.jpg",
-    "galeria": [
-      "assets/img/puerto-viejo-1.jpg",
-      "assets/img/puerto-viejo-2.jpg",
-      "assets/img/puerto-viejo-3.jpg"
-    ],
-    "audio": "assets/audio/puerto-viejo-guia.mp3",
-    "video": "assets/video/puerto-viejo.mp4",
-    "actividades": [
-      "Surf",
-      "Ciclismo",
-      "Gastronomía caribeña",
-      "Avistamiento de perezosos",
-      "Snorkel"
-    ],
-    "lat": 9.6554,
-    "lng": -82.7538
-  },
-  {
-    "id": "guanacaste-001",
-    "nombre": "Tamarindo",
-    "region": "Pacífico Norte",
-    "descripcion": "Tamarindo es uno de los balnearios más internacionales de Costa Rica, ubicado en la provincia de Guanacaste. Sus olas consistentes lo convierten en un paraíso para el surf de todos los niveles. Además, la playa es un sitio de anidación de tortugas baula, y los visitantes pueden participar en tours nocturnos para observar este proceso durante la temporada. El ambiente cosmopolita y la hermosa puesta de sol sobre el Pacífico lo hacen único.",
-    "imagen_portada": "assets/img/tamarindo-portada.jpg",
-    "galeria": [
-      "assets/img/tamarindo-1.jpg",
-      "assets/img/tamarindo-2.jpg",
-      "assets/img/tamarindo-3.jpg"
-    ],
-    "audio": "assets/audio/tamarindo-guia.mp3",
-    "video": "assets/video/tamarindo.mp4",
-    "actividades": [
-      "Surf",
-      "Kayak",
-      "Observación de tortugas",
-      "Paddleboard",
-      "Puesta de sol"
-    ],
-    "lat": 10.2996,
-    "lng": -85.8399
-  },
-  {
-    "id": "guanacaste-002",
-    "nombre": "Rincón de la Vieja",
-    "region": "Pacífico Norte",
-    "descripcion": "El Parque Nacional Rincón de la Vieja alberga un volcán activo con una mística laguna cratérica de color esmeralda. El área geotérmica ofrece un paisaje de otro mundo con fumarolas, pozas de barro hirviente y aguas termales naturales. Los bosques tropicales secos que rodean el volcán son hogar de pumas, monos Congo y cientos de especies de aves. El canopy y el tubing por el río son experiencias imperdibles.",
-    "imagen_portada": "assets/img/rincon-vieja-portada.jpg",
-    "galeria": [
-      "assets/img/rincon-vieja-1.jpg",
-      "assets/img/rincon-vieja-2.jpg",
-      "assets/img/rincon-vieja-3.jpg"
-    ],
-    "audio": "assets/audio/rincon-vieja-guia.mp3",
-    "video": "assets/video/rincon-vieja.mp4",
-    "actividades": [
-      "Canopy",
-      "Aguas termales",
-      "Senderismo al cráter",
-      "Tubing",
-      "Avistamiento de aves"
-    ],
-    "lat": 10.8312,
-    "lng": -85.3243
-  },
-  {
-    "id": "central-001",
-    "nombre": "Volcán Poás",
-    "region": "Central",
-    "descripcion": "El Volcán Poás es uno de los volcanes más accesibles del mundo, con un sendero corto que lleva directamente al borde de su cráter activo. La laguna cratérica de color turquesa brillante y los penachos de vapor que emite constantemente lo convierten en un espectáculo natural sin igual. El bosque nuboso que lo rodea es un ecosistema único, con plantas enanas adaptadas a las condiciones extremas de altitud y acidez.",
-    "imagen_portada": "assets/img/poas-portada.jpg",
-    "galeria": [
-      "assets/img/poas-1.jpg",
-      "assets/img/poas-2.jpg",
-      "assets/img/poas-3.jpg"
-    ],
-    "audio": "assets/audio/poas-guia.mp3",
-    "video": "assets/video/poas.mp4",
-    "actividades": [
-      "Observación del cráter",
-      "Senderismo",
-      "Fotografía de naturaleza",
-      "Observación de aves",
-      "Visita al bosque nuboso"
-    ],
-    "lat": 10.1956,
-    "lng": -84.2316
-  },
-  {
-    "id": "central-002",
-    "nombre": "Valle de Orosi",
-    "region": "Central",
-    "descripcion": "El Valle de Orosi es considerado uno de los valles más bellos de Costa Rica. Rodeado de montañas verdes y cafetales, el valle alberga la iglesia más antigua del país en uso continuo, construida en el siglo XVIII. Las aguas termales naturales de la zona y el embalse de Cachí ofrecen paisajes de postal. Los tours de café en las plantaciones locales permiten conocer todo el proceso de producción del famoso café costarricense.",
-    "imagen_portada": "assets/img/orosi-portada.jpg",
-    "galeria": [
-      "assets/img/orosi-1.jpg",
-      "assets/img/orosi-2.jpg",
-      "assets/img/orosi-3.jpg"
-    ],
-    "audio": "assets/audio/orosi-guia.mp3",
-    "video": "assets/video/orosi.mp4",
-    "actividades": [
-      "Tour de café",
-      "Aguas termales",
-      "Ciclismo de montaña",
-      "Visita iglesia colonial",
-      "Senderismo"
-    ],
-    "lat": 9.7897,
-    "lng": -83.8488
-  },
-  {
-    "id": "sur-001",
-    "nombre": "Manuel Antonio",
-    "region": "Pacífico Sur",
-    "descripcion": "El Parque Nacional Manuel Antonio es quizás el más famoso de Costa Rica. Sus playas de arena blanca rodeadas de selva tropical son el hogar de monos capuchinos, monos ardilla en peligro de extinción, perezosos, iguanas y cientos de especies de aves. Sus aguas son ideales para el snorkel y el kayak. A pesar de ser uno de los parques más pequeños del país, es el más biodiverso por kilómetro cuadrado.",
-    "imagen_portada": "assets/img/manuel-antonio-portada.jpg",
-    "galeria": [
-      "assets/img/manuel-antonio-1.jpg",
-      "assets/img/manuel-antonio-2.jpg",
-      "assets/img/manuel-antonio-3.jpg"
-    ],
-    "audio": "assets/audio/manuel-antonio-guia.mp3",
-    "video": "assets/video/manuel-antonio.mp4",
-    "actividades": [
-      "Avistamiento de fauna",
-      "Snorkel",
-      "Senderismo",
-      "Kayak",
-      "Natación"
-    ],
-    "lat": 9.392,
-    "lng": -84.1375
-  },
-  {
-    "id": "sur-002",
-    "nombre": "Uvita — Marino Ballena",
-    "region": "Pacífico Sur",
-    "descripcion": "El Parque Nacional Marino Ballena protege la famosa 'cola de ballena', una formación natural de arena y rocas que toma la forma exacta de la cola de una ballena gigante. El parque es uno de los mejores lugares del mundo para avistar ballenas jorobadas, que visitan estas aguas entre julio y octubre, y entre enero y marzo. Delfines, tortugas y una rica vida marina completan la experiencia en este paraíso del Pacífico Sur.",
-    "imagen_portada": "assets/img/uvita-portada.jpg",
-    "galeria": [
-      "assets/img/uvita-1.jpg",
-      "assets/img/uvita-2.jpg",
-      "assets/img/uvita-3.jpg"
-    ],
-    "audio": "assets/audio/uvita-guia.mp3",
-    "video": "assets/video/uvita.mp4",
-    "actividades": [
-      "Avistamiento de ballenas",
-      "Snorkel",
-      "Kayak",
-      "Cola de ballena",
-      "Buceo"
-    ],
-    "lat": 9.1566,
-    "lng": -83.7318
-  }
-]
+      "id": "ma-01",
+      "nombre": "Manuel Antonio",
+      "region": "Pacífico Central",
+      "descripcion": "La vida silvestre se encuentra con el océano. Observa perezosos y aves a pocos pasos de la arena.",
+      "imagen_portada": "assets/img/manuel-antonio-1.jpg",
+      "actividades": ["Playa", "Senderismo"],
+      "tipo": "featured"
+    },
+    {
+      "id": "po-02",
+      "nombre": "Volcán Poás",
+      "region": "Central",
+      "descripcion": "Uno de los cráteres más grandes del mundo con una laguna turquesa impresionante.",
+      "imagen_portada": "assets/img/poas-1.jpg",
+      "actividades": ["Volcanes", "Mirador"],
+      "tipo": "medium"
+    },
+    {
+      "id": "mv-03",
+      "nombre": "Monteverde",
+      "region": "Puntarenas",
+      "descripcion": "Camina entre las nubes en este bosque nuboso único.",
+      "imagen_portada": "assets/img/orosi-1.jpg",
+      "actividades": ["Puentes", "Bosque"]
+    },
+    {
+      "id": "ar-04",
+      "nombre": "Volcán Arenal",
+      "region": "Norte",
+      "descripcion": "Aventura y aguas termales bajo el cono volcánico perfecto.",
+      "imagen_portada": "assets/img/tamarindo-1.jpg",
+      "actividades": ["Aguas Termales", "Aventura"]
+    },
+    {
+      "id": "to-05",
+      "nombre": "Tortuguero",
+      "region": "Caribe",
+      "descripcion": "El Amazonas de Costa Rica, hogar de miles de tortugas.",
+      "imagen_portada": "assets/img/puerto-viejo-1.jpg",
+      "actividades": ["Bote", "Tortugas"]
+    }
+  ]
 }
