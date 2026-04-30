@@ -2,59 +2,139 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Guia Turistica de Costa Rica</title>
+    <title>Pura Vida Guide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- CSS -->
     <link rel="stylesheet" href="css/global.css">
+
+    <!-- COMPONENTES -->
     <script type="module" src="components/app-header.js"></script>
+    <script type="module" src="components/destino-card.js"></script>
+    <script type="module" src="components/destino-detalle.js"></script>
+    <script type="module" src="components/galeria-imagenes.js"></script>
+    <script type="module" src="components/audio-guia.js"></script>
 </head>
 
 <body>
-    <app-header></app-header>
 
-    <main>
+<!-- HEADER -->
+<app-header></app-header>
 
-        <!-- HERO MAP -->
-        <section class="hero-map">
-            <img src="assets/img/mapa2.0.png" class="map-img">
+<main>
 
-            <button class="pin pin-norte">Pacífico Norte</button>
-            <button class="pin pin-central">Central</button>
-            <button class="pin pin-caribe">Caribe</button>
-            <button class="pin pin-sur">Sur</button>
+    <!-- HERO MAP -->
+    <section class="hero-map">
+        <img src="assets/img/mapa.jpg" class="map-img">
 
-            <div class="search-container">
-                <div class="search-bar">
-                    <input type="text" placeholder="¿A dónde ir después?">
-                    <button>Buscar Tours</button>
-                </div>
+        <button class="pin pin-norte">Pacífico Norte</button>
+        <button class="pin pin-central">Central</button>
+        <button class="pin pin-caribe">Caribe</button>
+        <button class="pin pin-sur">Pacífico Sur</button>
+
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" id="buscador" placeholder="¿A dónde ir después?">
+                <button id="btnBuscar">Buscar</button>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- DESTINOS -->
-        <section id="destinos-container" class="destinos-grid"></section>
+    <!-- LISTA -->
+    <section id="lista" class="destinos-grid"></section>
 
-    </main>
+    <!-- DETALLE -->
+    <section id="detalle"></section>
 
-    <script type="module">
-        async function renderizar() {
-            const res = await fetch('./data/destinos.json');
-            const data = await res.json();
-            const container = document.getElementById('destinos-container');
+</main>
 
-            container.innerHTML = data.destinos.map(d => `
-                <article class="card">
-                    <img src="${d.imagen_portada}" alt="${d.nombre}">
-                    <div class="card-content">
-                        <h3>${d.nombre}</h3>
-                        <p>${d.descripcion}</p>
-                    </div>
-                </article>
-            `).join('');
-        }
+<!-- SCRIPT PRINCIPAL -->
+<script type="module">
 
-        renderizar();
-    </script>
+let destinos = [];
+
+async function cargarDatos() {
+    const res = await fetch('./data/destinos.json');
+    const data = await res.json();
+    destinos = data.destinos;
+    renderLista(destinos);
+}
+
+function renderLista(lista) {
+    const cont = document.getElementById('lista');
+    const detalle = document.getElementById('detalle');
+
+    cont.innerHTML = '';
+    detalle.innerHTML = '';
+
+    lista.forEach(d => {
+        const card = document.createElement('destino-card');
+        card.data = d;
+        cont.appendChild(card);
+    });
+}
+
+function renderDetalle(id) {
+    const cont = document.getElementById('detalle');
+    const lista = document.getElementById('lista');
+
+    const destino = destinos.find(d => d.id === id);
+
+    lista.innerHTML = '';
+    cont.innerHTML = '';
+
+    const detalle = document.createElement('destino-detalle');
+    detalle.data = destino;
+
+    cont.appendChild(detalle);
+}
+
+// 🔥 Router SPA
+window.addEventListener('hashchange', () => {
+    const hash = window.location.hash;
+
+    if (hash.includes('detalle')) {
+        const id = hash.replace('#detalle-', '');
+        renderDetalle(id);
+    } else {
+        renderLista(destinos);
+    }
+});
+
+// 🔍 Buscador
+document.addEventListener('DOMContentLoaded', () => {
+
+    document.getElementById('btnBuscar').addEventListener('click', () => {
+        const texto = document.getElementById('buscador').value.toLowerCase();
+
+        const filtrados = destinos.filter(d =>
+            d.nombre.toLowerCase().includes(texto) ||
+            d.region.toLowerCase().includes(texto)
+        );
+
+        renderLista(filtrados);
+    });
+
+});
+
+// 📍 Filtro por región (pins)
+document.addEventListener('click', (e) => {
+
+    if (e.target.classList.contains('pin')) {
+
+        const region = e.target.innerText;
+
+        const filtrados = destinos.filter(d =>
+            d.region.toLowerCase().includes(region.toLowerCase())
+        );
+
+        renderLista(filtrados);
+    }
+});
+
+cargarDatos();
+
+</script>
 
 </body>
 </html>
