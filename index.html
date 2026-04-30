@@ -1,118 +1,138 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Guía Turística de Costa Rica</title>
+    <meta charset="UTF-8">
+    <title>Pura Vida Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Estilos globales (solo reset y fuentes, no frameworks) -->
-<link rel="stylesheet" href="css/global.css" />
-<!--
-    IMPORTACIÓN DE WEB COMPONENTS
-    type="module" es OBLIGATORIO para usar ES Modules (import/export).
-    Cada componente se importa como un módulo independiente.
--->
-<script type="module" src="components/app-header.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
 
-<!--
-    FASE 2: descomentar estos imports cuando estén listos
+    <!-- COMPONENTES -->
+    <script type="module" src="components/app-header.js"></script>
     <script type="module" src="components/destino-card.js"></script>
     <script type="module" src="components/destino-detalle.js"></script>
     <script type="module" src="components/galeria-imagenes.js"></script>
     <script type="module" src="components/audio-guia.js"></script>
--->
 </head>
+
 <body>
 
-<!--
-    USO DEL CUSTOM ELEMENT <app-header>
-    El atributo 'active-region' resalta la región seleccionada en el menú.
-    Puede cambiar dinámicamente con JavaScript.
--->
-<app-header active-region="Caribe"></app-header>
+<!-- HEADER -->
+<app-header></app-header>
 
-<!-- CONTENIDO PRINCIPAL -->
-<main id="main-content">
+<main>
 
-    <!-- Sección de destinos — se llenará dinámicamente con JavaScript -->
-    <section id="destinos-container" aria-live="polite">
-    <p class="loading-msg">Cargando destinos...</p>
+    <!-- HERO MAP -->
+    <section class="hero-map">
+        <img src="assets/img/mapa.jpg" class="map-img">
+
+        <button class="pin pin-norte">Pacífico Norte</button>
+        <button class="pin pin-central">Central</button>
+        <button class="pin pin-caribe">Caribe</button>
+        <button class="pin pin-sur">Pacífico Sur</button>
+
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" id="buscador" placeholder="¿A dónde ir después?">
+                <button id="btnBuscar">Buscar</button>
+            </div>
+        </div>
     </section>
+
+    <!-- LISTA -->
+    <section id="lista" class="destinos-grid"></section>
+
+    <!-- DETALLE -->
+    <section id="detalle"></section>
 
 </main>
 
-<footer>
-    <p>Guía Turística de Costa Rica &copy; 2026 | IF7102 – Multimedios | UCR</p>
-</footer>
-
-<!--
-    SCRIPT PRINCIPAL — Lógica de la aplicación
-    type="module" permite usar import/export y corre en modo estricto.
--->
+<!-- SCRIPT PRINCIPAL -->
 <script type="module">
 
-    //  ESCUCHAR EL EVENTO DEL HEADER 
-    // Cuando el usuario hace clic en una región del menú,
-    // app-header emite 'region-selected'. Aquí lo capturamos
-    // y filtramos los destinos según la región elegida.
-    // 
-    document.querySelector('app-header').addEventListener('region-selected', (evento) => {
-    const regionElegida = evento.detail.region;
-    console.log('Región seleccionada:', regionElegida);
-      // En Fase 2: filtrarDestinosPorRegion(regionElegida);
+let destinos = [];
+
+async function cargarDatos() {
+    const res = await fetch('./data/destinos.json');
+    const data = await res.json();
+    destinos = data.destinos;
+    renderLista(destinos);
+}
+
+function renderLista(lista) {
+    const cont = document.getElementById('lista');
+    const detalle = document.getElementById('detalle');
+
+    cont.innerHTML = '';
+    detalle.innerHTML = '';
+
+    lista.forEach(d => {
+        const card = document.createElement('destino-card');
+        card.data = d;
+        cont.appendChild(card);
+    });
+}
+
+function renderDetalle(id) {
+    const cont = document.getElementById('detalle');
+    const lista = document.getElementById('lista');
+
+    const destino = destinos.find(d => d.id === id);
+
+    lista.innerHTML = '';
+    cont.innerHTML = '';
+
+    const detalle = document.createElement('destino-detalle');
+    detalle.data = destino;
+
+    cont.appendChild(detalle);
+}
+
+// 🔥 Router SPA
+window.addEventListener('hashchange', () => {
+    const hash = window.location.hash;
+
+    if (hash.includes('detalle')) {
+        const id = hash.replace('#detalle-', '');
+        renderDetalle(id);
+    } else {
+        renderLista(destinos);
+    }
+});
+
+// 🔍 Buscador
+document.addEventListener('DOMContentLoaded', () => {
+
+    document.getElementById('btnBuscar').addEventListener('click', () => {
+        const texto = document.getElementById('buscador').value.toLowerCase();
+
+        const filtrados = destinos.filter(d =>
+            d.nombre.toLowerCase().includes(texto) ||
+            d.region.toLowerCase().includes(texto)
+        );
+
+        renderLista(filtrados);
     });
 
+});
 
-    //  CARGAR DESTINOS DESDE JSON 
-    // fetch() es la forma nativa de cargar datos externos.
-    // IMPORTANTE: esto solo funciona con un servidor local,
-    // no abriendo el archivo directamente en el navegador.
-    // 
-    async function cargarDestinos() {
-    try {
-        const respuesta = await fetch('./data/destinos.json');
+// 📍 Filtro por región (pins)
+document.addEventListener('click', (e) => {
 
-        // Si la respuesta no fue exitosa, lanzamos un error
-        if (!respuesta.ok) {
-        throw new Error(`Error HTTP: ${respuesta.status}`);
-        }
+    if (e.target.classList.contains('pin')) {
 
-        const datos = await respuesta.json();
-        console.log('Destinos cargados:', datos.destinos.length);
+        const region = e.target.innerText;
 
-        // Por ahora solo mostramos en consola
-        // En Fase 2: renderizarDestinos(datos.destinos);
-        mostrarDestinosTemporales(datos.destinos);
+        const filtrados = destinos.filter(d =>
+            d.region.toLowerCase().includes(region.toLowerCase())
+        );
 
-    } catch (error) {
-        console.error('Error al cargar destinos:', error);
-        document.getElementById('destinos-container').innerHTML =
-        '<p class="error-msg">Error al cargar los destinos. Asegúrate de usar un servidor local.</p>';
+        renderLista(filtrados);
     }
-    }
+});
 
-    // Función temporal para Fase 1 — muestra los nombres en lista
-    function mostrarDestinosTemporales(destinos) {
-    const contenedor = document.getElementById('destinos-container');
-    contenedor.innerHTML = `
-        <h2>Destinos disponibles (${destinos.length})</h2>
-        <ul class="destinos-lista">
-        ${destinos.map(d => `
-            <li>
-            <strong>${d.nombre}</strong> — ${d.region}
-            <span class="actividades">${d.actividades.slice(0, 2).join(', ')}</span>
-            </li>
-        `).join('')}
-        </ul>
-        <p class="fase-nota">
-        Esta es la vista temporal de Fase 1.
-        En Fase 2 se mostrarán las tarjetas completas con imagen y audio.
-        </p>
-    `;
-    }
-
-    // Iniciamos la carga al cargar la página
-    cargarDestinos();
+cargarDatos();
 
 </script>
 
