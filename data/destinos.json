@@ -1,5 +1,6 @@
-[
-  {
+{
+  "destinos": [
+    {
     "id": "caribe-001",
     "nombre": "Cahuita",
     "region": "Caribe",
@@ -184,3 +185,4 @@
     "lng": -83.7318
   }
 ]
+}
