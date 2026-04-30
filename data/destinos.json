@@ -1,46 +1,56 @@
 {
   "destinos": [
     {
-      "id": "ma-01",
       "nombre": "Manuel Antonio",
-      "region": "Pacífico Central",
-      "descripcion": "La vida silvestre se encuentra con el océano. Observa perezosos y aves a pocos pasos de la arena.",
-      "imagen_portada": "assets/img/manuel-antonio-1.jpg",
-      "actividades": ["Playa", "Senderismo"],
-      "tipo": "featured"
+      "tipo": "featured",
+      "region": "Costa del Pacífico",
+      "descripcion": "La vida silvestre se encuentra con el océano.",
+      "imagen_portada": "assets/img/manuel-antonioprueba1.png"
     },
     {
-      "id": "po-02",
       "nombre": "Volcán Poás",
-      "region": "Central",
-      "descripcion": "Uno de los cráteres más grandes del mundo con una laguna turquesa impresionante.",
-      "imagen_portada": "assets/img/poas-1.jpg",
-      "actividades": ["Volcanes", "Mirador"],
-      "tipo": "medium"
+      "tipo": "medium",
+      "region": "Central Highlands",
+      "descripcion": "Uno de los cráteres activos más grandes.",
+      "imagen_portada": "assets/img/poas-1.jpg"
     },
+
     {
-      "id": "mv-03",
       "nombre": "Monteverde",
-      "region": "Puntarenas",
-      "descripcion": "Camina entre las nubes en este bosque nuboso único.",
-      "imagen_portada": "assets/img/orosi-1.jpg",
-      "actividades": ["Puentes", "Bosque"]
+      "tipo": "small",
+      "descripcion": "Bosque nuboso y puentes colgantes.",
+      "imagen_portada": "assets/img/orosi-1.jpg"
     },
     {
-      "id": "ar-04",
-      "nombre": "Volcán Arenal",
-      "region": "Norte",
-      "descripcion": "Aventura y aguas termales bajo el cono volcánico perfecto.",
-      "imagen_portada": "assets/img/tamarindo-1.jpg",
-      "actividades": ["Aguas Termales", "Aventura"]
+      "nombre": "Arenal",
+      "tipo": "small",
+      "descripcion": "Volcán perfecto y aguas termales.",
+      "imagen_portada": "assets/img/tamarindo-1.jpg"
     },
     {
-      "id": "to-05",
       "nombre": "Tortuguero",
-      "region": "Caribe",
-      "descripcion": "El Amazonas de Costa Rica, hogar de miles de tortugas.",
-      "imagen_portada": "assets/img/puerto-viejo-1.jpg",
-      "actividades": ["Bote", "Tortugas"]
+      "tipo": "small",
+      "descripcion": "Canales y naturaleza salvaje.",
+      "imagen_portada": "assets/img/puerto-viejo-1.jpg"
+    },
+
+    {
+      "nombre": "Cahuita",
+      "tipo": "small",
+      "descripcion": "Parque nacional caribeño.",
+      "imagen_portada": "assets/img/cahuita-1.jpg"
+    },
+    {
+      "nombre": "Rincón de la Vieja",
+      "tipo": "small",
+      "descripcion": "Volcanes y senderos.",
+      "imagen_portada": "assets/img/rincon-vieja-1.jpg"
+    },
+    {
+      "nombre": "Uvita",
+      "tipo": "small",
+      "descripcion": "Playa cola de ballena.",
+      "imagen_portada": "assets/img/uvita-1.jpg"
     }
   ]
 }

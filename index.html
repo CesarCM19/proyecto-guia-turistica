@@ -2,80 +2,59 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Pura Vida Guide</title>
+    <title>Guia Turistica de Costa Rica</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="css/global.css">
     <script type="module" src="components/app-header.js"></script>
 </head>
+
 <body>
     <app-header></app-header>
 
     <main>
-        <!-- Hero Section con Mapa e Imágenes Locales -->
+
+        <!-- HERO MAP -->
         <section class="hero-map">
-    <!-- El mapa ahora se ajustará al contenedor sin recortarse -->
-    <img src="assets/img/mapa.jpg" alt="Mapa interactivo" class="map-img">
-    
-    <!-- Pins con nuevas posiciones -->
-    <button class="pin pin-norte">Pacífico Norte</button>
-    <button class="pin pin-caribe">Caribe</button>
-    <button class="pin pin-central">Central</button>
-    <button class="pin pin-sur">Sur</button>
+            <img src="assets/img/mapa2.0.png" class="map-img">
 
-    <div class="search-container">
-        <div class="search-bar">
-            <input type="text" placeholder="¿A dónde ir después?">
-            <button class="btn-search">Buscar Tours</button>
-        </div>
-    </div>
-</section>
+            <button class="pin pin-norte">Pacífico Norte</button>
+            <button class="pin pin-central">Central</button>
+            <button class="pin pin-caribe">Caribe</button>
+            <button class="pin pin-sur">Sur</button>
 
-        <!-- Grid Dinámico -->
-        <section id="destinos-container" class="destinos-grid">
-            <!-- Cargado por JS -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" placeholder="¿A dónde ir después?">
+                    <button>Buscar Tours</button>
+                </div>
+            </div>
         </section>
+
+        <!-- DESTINOS -->
+        <section id="destinos-container" class="destinos-grid"></section>
+
     </main>
 
     <script type="module">
         async function renderizar() {
             const res = await fetch('./data/destinos.json');
-            const { destinos } = await res.json();
+            const data = await res.json();
             const container = document.getElementById('destinos-container');
 
-            container.innerHTML = destinos.map(d => {
-                if(d.tipo === 'featured') {
-                    return `
-                    <article class="card card-featured">
-                        <img src="${d.imagen_portada}" class="card-img">
-                        <div class="overlay">
-                            <span class="badge">${d.region}</span>
-                            <h2>${d.nombre}</h2>
-                            <p>${d.descripcion}</p>
-                            <button class="btn-search" style="margin-top:15px; width:fit-content">Explorar Guía</button>
-                        </div>
-                    </article>`;
-                } else if(d.tipo === 'medium') {
-                    return `
-                    <article class="card card-medium">
-                        <img src="${d.imagen_portada}" class="card-img">
-                        <div class="overlay">
-                            <span class="badge">${d.region}</span>
-                            <h3>${d.nombre}</h3>
-                            <button class="btn-search" style="font-size:12px; padding:8px 16px">Ver Detalles</button>
-                        </div>
-                    </article>`;
-                } else {
-                    return `
-                    <article class="card card-small">
-                        <div class="img-box"><img src="${d.imagen_portada}" class="card-img"></div>
-                        <div class="card-content">
-                            <h4>${d.nombre}</h4>
-                            <p style="font-size:12px; color:#666">${d.descripcion.substring(0,60)}...</p>
-                        </div>
-                    </article>`;
-                }
-            }).join('');
+            container.innerHTML = data.destinos.map(d => `
+                <article class="card">
+                    <img src="${d.imagen_portada}" alt="${d.nombre}">
+                    <div class="card-content">
+                        <h3>${d.nombre}</h3>
+                        <p>${d.descripcion}</p>
+                    </div>
+                </article>
+            `).join('');
         }
+
         renderizar();
     </script>
+
 </body>
 </html>
