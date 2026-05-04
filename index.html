@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Pura Vida Guide</title>
@@ -18,123 +19,124 @@
 
 <body>
 
-<!-- HEADER -->
-<app-header></app-header>
+    <!-- HEADER -->
+    <app-header></app-header>
 
-<main>
+    <main>
 
-    <!-- HERO MAP -->
-    <section class="hero-map">
-        <img src="assets/img/mapa.jpg" class="map-img">
+        <!-- HERO MAP -->
+        <section class="hero-map">
+            <img src="assets/img/mapa.jpg" class="map-img">
 
-        <button class="pin pin-norte">Pacífico Norte</button>
-        <button class="pin pin-central">Central</button>
-        <button class="pin pin-caribe">Caribe</button>
-        <button class="pin pin-sur">Pacífico Sur</button>
+            <button class="pin pin-norte">Pacífico Norte</button>
+            <button class="pin pin-central">Central</button>
+            <button class="pin pin-caribe">Caribe</button>
+            <button class="pin pin-sur">Pacífico Sur</button>
 
-        <div class="search-container">
-            <div class="search-bar">
-                <input type="text" id="buscador" placeholder="¿A dónde ir después?">
-                <button id="btnBuscar">Buscar</button>
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="buscador" placeholder="¿A dónde ir después?">
+                    <button id="btnBuscar">Buscar</button>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- LISTA -->
-    <section id="lista" class="destinos-grid"></section>
+        <!-- LISTA -->
+        <section id="lista" class="destinos-grid"></section>
 
-    <!-- DETALLE -->
-    <section id="detalle"></section>
+        <!-- DETALLE -->
+        <section id="detalle"></section>
 
-</main>
+    </main>
 
-<!-- SCRIPT PRINCIPAL -->
-<script type="module">
+    <!-- SCRIPT PRINCIPAL -->
+    <script type="module">
 
-let destinos = [];
+        let destinos = [];
 
-async function cargarDatos() {
-    const res = await fetch('./data/destinos.json');
-    const data = await res.json();
-    destinos = data.destinos;
-    renderLista(destinos);
-}
+        async function cargarDatos() {
+            const res = await fetch('./data/destinos.json');
+            const data = await res.json();
+            destinos = data.destinos;
+            renderLista(destinos);
+        }
 
-function renderLista(lista) {
-    const cont = document.getElementById('lista');
-    const detalle = document.getElementById('detalle');
+        function renderLista(lista) {
+            const cont = document.getElementById('lista');
+            const detalle = document.getElementById('detalle');
 
-    cont.innerHTML = '';
-    detalle.innerHTML = '';
+            cont.innerHTML = '';
+            detalle.innerHTML = '';
 
-    lista.forEach(d => {
-        const card = document.createElement('destino-card');
-        card.data = d;
-        cont.appendChild(card);
-    });
-}
+            lista.forEach(d => {
+                const card = document.createElement('destino-card');
+                card.data = d;
+                cont.appendChild(card);
+            });
+        }
 
-function renderDetalle(id) {
-    const cont = document.getElementById('detalle');
-    const lista = document.getElementById('lista');
+        function renderDetalle(id) {
+            const cont = document.getElementById('detalle');
+            const lista = document.getElementById('lista');
 
-    const destino = destinos.find(d => d.id === id);
+            const destino = destinos.find(d => d.id === id);
 
-    lista.innerHTML = '';
-    cont.innerHTML = '';
+            lista.innerHTML = '';
+            cont.innerHTML = '';
 
-    const detalle = document.createElement('destino-detalle');
-    detalle.data = destino;
+            const detalle = document.createElement('destino-detalle');
+            detalle.data = destino;
 
-    cont.appendChild(detalle);
-}
+            cont.appendChild(detalle);
+        }
 
-// 🔥 Router SPA
-window.addEventListener('hashchange', () => {
-    const hash = window.location.hash;
+        // 🔥 Router SPA
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash;
 
-    if (hash.includes('detalle')) {
-        const id = hash.replace('#detalle-', '');
-        renderDetalle(id);
-    } else {
-        renderLista(destinos);
-    }
-});
+            if (hash.includes('detalle')) {
+                const id = hash.replace('#detalle-', '');
+                renderDetalle(id);
+            } else {
+                renderLista(destinos);
+            }
+        });
 
-// 🔍 Buscador
-document.addEventListener('DOMContentLoaded', () => {
+        // 🔍 Buscador
+        document.addEventListener('DOMContentLoaded', () => {
 
-    document.getElementById('btnBuscar').addEventListener('click', () => {
-        const texto = document.getElementById('buscador').value.toLowerCase();
+            document.getElementById('btnBuscar').addEventListener('click', () => {
+                const texto = document.getElementById('buscador').value.toLowerCase();
 
-        const filtrados = destinos.filter(d =>
-            d.nombre.toLowerCase().includes(texto) ||
-            d.region.toLowerCase().includes(texto)
-        );
+                const filtrados = destinos.filter(d =>
+                    d.nombre.toLowerCase().includes(texto) ||
+                    d.region.toLowerCase().includes(texto)
+                );
 
-        renderLista(filtrados);
-    });
+                renderLista(filtrados);
+            });
 
-});
+        });
 
-// 📍 Filtro por región (pins)
-document.addEventListener('click', (e) => {
+        // 📍 Filtro por región (pins)
+        document.addEventListener('click', (e) => {
 
-    if (e.target.classList.contains('pin')) {
+            if (e.target.classList.contains('pin')) {
 
-        const region = e.target.innerText;
+                const region = e.target.innerText;
 
-        const filtrados = destinos.filter(d =>
-            d.region.toLowerCase().includes(region.toLowerCase())
-        );
+                const filtrados = destinos.filter(d =>
+                    d.region.toLowerCase().includes(region.toLowerCase())
+                );
 
-        renderLista(filtrados);
-    }
-});
+                renderLista(filtrados);
+            }
+        });
 
-cargarDatos();
+        cargarDatos();
 
-</script>
+    </script>
 
 </body>
+
 </html>
