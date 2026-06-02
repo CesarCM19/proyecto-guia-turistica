@@ -118,11 +118,17 @@
 <script type="module">
 let destinos = [];
 
-async function cargarDatos() {
-    const res = await fetch('./data/destinos.json');
-    const data = await res.json();
-    destinos = data.destinos;
-    renderLista(destinos);
+function getSlugFromRegion(region) {
+    if (!region) return '';
+    // Mapeo directo
+    if (regionToSlug[region]) return regionToSlug[region];
+    // Normalización de seguridad por si cambia el texto
+    const norm = region.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (norm.includes('norte')) return 'pacifico-norte';
+    if (norm.includes('sur')) return 'sur';
+    if (norm.includes('caribe')) return 'caribe';
+    if (norm.includes('central')) return 'central';
+    return norm;
 }
 
 function renderLista(lista, titulo = 'Destinos Destacados') {
@@ -139,10 +145,41 @@ function renderLista(lista, titulo = 'Destinos Destacados') {
     if(vistaAudios) vistaAudios.style.display = 'none';
     vistaLista.style.display = 'block';
 
-    lista.forEach(d => {
-        const card = document.createElement('destino-card');
-        card.data = d;
-        cont.appendChild(card);
+// ==========================================
+// BUSCADOR AVANZADO (DIACRÍTICOS Y MULTI-CAMPO)
+// ==========================================
+function getFilteredDestinos() {
+    return state.destinos.filter(d => {
+        // 1. Filtro por Región Activa
+        if (state.regionActual) {
+            if (d.region.toLowerCase() !== state.regionActual.toLowerCase()) {
+                return false;
+            }
+        }
+        
+        // 2. Filtro por Búsqueda Activa (Nombre, Región, Descripción, Actividades)
+        if (state.busquedaActual) {
+            // Normalizar eliminando acentos/tildes y convirtiendo a minúsculas
+            const query = state.busquedaActual.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            if (query !== "") {
+                const nombreNorm = d.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const regionNorm = d.region.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const descNorm = d.descripcion.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                
+                const matchNombre = nombreNorm.includes(query);
+                const matchRegion = regionNorm.includes(query);
+                const matchDesc = descNorm.includes(query);
+                const matchAct = d.actividades.some(act => 
+                    act.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(query)
+                );
+                
+                if (!matchNombre && !matchRegion && !matchDesc && !matchAct) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
     });
 }
 
@@ -171,7 +208,26 @@ window.addEventListener('hashchange', () => {
         const id = hash.replace('#detalle-', '');
         renderDetalle(id);
     } else {
-        renderLista(destinos);
+        // Vista de Lista
+        heroMap.style.display = 'block';
+        lista.style.display = 'grid';
+        detalle.style.display = 'none';
+        detalle.innerHTML = '';
+        
+        highlightActivePin();
+        
+        const filtrados = getFilteredDestinos();
+        
+        if (filtrados.length === 0) {
+            renderStatus('no-results', 'No se encontraron destinos para los criterios seleccionados.');
+        } else {
+            lista.innerHTML = '';
+            filtrados.forEach(d => {
+                const card = document.createElement('destino-card');
+                card.data = d;
+                lista.appendChild(card);
+            });
+        }
     }
 });
 
