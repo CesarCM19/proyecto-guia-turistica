@@ -1,13 +1,92 @@
 class DestinoCard extends HTMLElement {
 
+    static get observedAttributes() {
+        return [
+            'destino-id',
+            'nombre',
+            'imagen',
+            'region'
+        ];
+    }
+
     constructor() {
         super();
+
         this.attachShadow({ mode: 'open' });
+
+        this.destino = {
+            id: '',
+            nombre: '',
+            imagen_portada: '',
+            region: '',
+            descripcion: ''
+        };
+    }
+
+    connectedCallback() {
+
+        if (!this.destino.id) {
+
+            this.destino.id =
+                this.getAttribute('destino-id') || '';
+
+            this.destino.nombre =
+                this.getAttribute('nombre') || '';
+
+            this.destino.imagen_portada =
+                this.getAttribute('imagen') || '';
+
+            this.destino.region =
+                this.getAttribute('region') || '';
+        }
+
+        this.render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+
+        if (oldValue === newValue) return;
+
+        switch (name) {
+
+            case 'destino-id':
+                this.destino.id = newValue;
+                break;
+
+            case 'nombre':
+                this.destino.nombre = newValue;
+                break;
+
+            case 'imagen':
+                this.destino.imagen_portada = newValue;
+                break;
+
+            case 'region':
+                this.destino.region = newValue;
+                break;
+        }
+
+        this.render();
     }
 
     set data(destino) {
         this.destino = destino;
         this.render();
+    }
+
+    navegarDetalle() {
+
+        this.dispatchEvent(
+            new CustomEvent('destino-selected', {
+                bubbles: true,
+                composed: true,
+                detail: {
+                    id: this.destino.id
+                }
+            })
+        );
+
+        window.location.hash = `#detalle-${this.destino.id}`;
     }
 
     render() {
@@ -19,7 +98,6 @@ class DestinoCard extends HTMLElement {
 
                 :host {
                     display: block;
-                    cursor: pointer;
                 }
 
                 .card {
@@ -27,14 +105,23 @@ class DestinoCard extends HTMLElement {
                     border-radius: 12px;
                     overflow: hidden;
                     box-shadow: 0 4px 12px rgba(0,0,0,.12);
-                    transition: transform .25s ease,
-                                box-shadow .25s ease;
+                    transition:
+                        transform .25s ease,
+                        box-shadow .25s ease;
+                    cursor: pointer;
                     height: 100%;
+                    outline: none;
                 }
 
                 .card:hover {
                     transform: translateY(-4px);
                     box-shadow: 0 8px 20px rgba(0,0,0,.18);
+                }
+
+                .card:focus {
+                    box-shadow:
+                        0 0 0 3px #1a5276,
+                        0 8px 20px rgba(0,0,0,.18);
                 }
 
                 img {
@@ -71,7 +158,13 @@ class DestinoCard extends HTMLElement {
 
             </style>
 
-            <article class="card">
+            <article
+                class="card"
+                tabindex="0"
+                role="button"
+                aria-label="Ver información de ${this.destino.nombre}"
+            >
+
                 <img
                     src="${this.destino.imagen_portada}"
                     alt="${this.destino.nombre}"
@@ -79,6 +172,7 @@ class DestinoCard extends HTMLElement {
                 >
 
                 <div class="card-content">
+
                     <span class="region">
                         ${this.destino.region}
                     </span>
@@ -86,27 +180,30 @@ class DestinoCard extends HTMLElement {
                     <h3>${this.destino.nombre}</h3>
 
                     <p>
-                        ${this.destino.descripcion.substring(0, 120)}...
+                        ${(this.destino.descripcion || '').substring(0, 120)}...
                     </p>
+
                 </div>
+
             </article>
         `;
 
         const card = this.shadowRoot.querySelector('.card');
 
         card.addEventListener('click', () => {
+            this.navegarDetalle();
+        });
 
-            this.dispatchEvent(
-                new CustomEvent('destino-selected', {
-                    bubbles: true,
-                    composed: true,
-                    detail: {
-                        id: this.destino.id
-                    }
-                })
-            );
+        card.addEventListener('keydown', (event) => {
 
-            window.location.hash = `#detalle-${this.destino.id}`;
+            if (
+                event.key === 'Enter' ||
+                event.key === ' '
+            ) {
+
+                event.preventDefault();
+                this.navegarDetalle();
+            }
         });
     }
 }
