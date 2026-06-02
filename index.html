@@ -51,88 +51,383 @@
 <!-- SCRIPT PRINCIPAL -->
 <script type="module">
 
-let destinos = [];
+// ==========================================
+// ESTADO GLOBAL DE LA APLICACIÓN
+// ==========================================
+const state = {
+    regionActual: null,   // "Caribe", "Pacífico Norte", "Central", "Pacífico Sur"
+    destinoActual: null,  // ID del destino seleccionado (e.g. "caribe-001")
+    busquedaActual: "",   // Query de búsqueda activa
+    destinos: []          // Caché de destinos cargados desde el JSON
+};
 
-async function cargarDatos() {
-    const res = await fetch('./data/destinos.json');
-    const data = await res.json();
-    destinos = data.destinos;
-    renderLista(destinos);
+// ==========================================
+// MAPEO DE REGIONES A SLUGS (BIDIRECCIONAL)
+// ==========================================
+const slugToRegion = {
+    'caribe': 'Caribe',
+    'pacifico-norte': 'Pacífico Norte',
+    'central': 'Central',
+    'sur': 'Pacífico Sur'
+};
+
+const regionToSlug = {
+    'Caribe': 'caribe',
+    'Pacífico Norte': 'pacifico-norte',
+    'Central': 'central',
+    'Pacífico Sur': 'sur'
+};
+
+function getRegionFromSlug(slug) {
+    return slugToRegion[slug?.toLowerCase()] || null;
 }
 
-function renderLista(lista) {
-    const cont = document.getElementById('lista');
-    const detalle = document.getElementById('detalle');
-
-    cont.innerHTML = '';
-    detalle.innerHTML = '';
-
-    lista.forEach(d => {
-        const card = document.createElement('destino-card');
-        card.data = d;
-        cont.appendChild(card);
-    });
+function getSlugFromRegion(region) {
+    if (!region) return '';
+    // Mapeo directo
+    if (regionToSlug[region]) return regionToSlug[region];
+    // Normalización de seguridad por si cambia el texto
+    const norm = region.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (norm.includes('norte')) return 'pacifico-norte';
+    if (norm.includes('sur')) return 'sur';
+    if (norm.includes('caribe')) return 'caribe';
+    if (norm.includes('central')) return 'central';
+    return norm;
 }
 
-function renderDetalle(id) {
-    const cont = document.getElementById('detalle');
+// ==========================================
+// RENDERIZADO DE ESTADOS DE INTERFAZ
+// ==========================================
+function renderStatus(type, message, onRetry = null) {
     const lista = document.getElementById('lista');
-
-    const destino = destinos.find(d => d.id === id);
-
-    lista.innerHTML = '';
-    cont.innerHTML = '';
-
-    const detalle = document.createElement('destino-detalle');
-    detalle.data = destino;
-
-    cont.appendChild(detalle);
+    const detalle = document.getElementById('detalle');
+    
+    // Ocultar sección de detalle y asegurar visualización de grilla/mapa en estados de lista
+    detalle.style.display = 'none';
+    lista.style.display = 'grid';
+    document.querySelector('.hero-map').style.display = 'block';
+    
+    if (!type) {
+        return;
+    }
+    
+    let htmlContent = '';
+    if (type === 'loading') {
+        htmlContent = `
+            <div id="status-container">
+                <div class="loader-content">
+                    <div class="spinner"></div>
+                    <p class="loader-text">${message}</p>
+                </div>
+            </div>
+        `;
+    } else if (type === 'error') {
+        htmlContent = `
+            <div id="status-container">
+                <div class="error-content">
+                    <span class="error-icon">⚠️</span>
+                    <p class="error-text">${message}</p>
+                    ${onRetry ? '<button id="btn-reintentar" class="btn-retry">Reintentar</button>' : ''}
+                </div>
+            </div>
+        `;
+    } else if (type === 'no-results') {
+        htmlContent = `
+            <div id="status-container">
+                <div class="no-results-content">
+                    <span class="no-results-icon">🔍</span>
+                    <p class="no-results-text">${message}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    lista.innerHTML = htmlContent;
+    
+    if (type === 'error' && onRetry) {
+        const btnRetry = document.getElementById('btn-reintentar');
+        if (btnRetry) {
+            btnRetry.addEventListener('click', onRetry);
+        }
+    }
 }
 
-// 🔥 Router SPA
-window.addEventListener('hashchange', () => {
-    const hash = window.location.hash;
-
-    if (hash.includes('detalle')) {
-        const id = hash.replace('#detalle-', '');
-        renderDetalle(id);
-    } else {
-        renderLista(destinos);
+// ==========================================
+// CARGA DE DATOS (FETCH & CACHE)
+// ==========================================
+async function cargarDatos() {
+    if (state.destinos.length > 0) {
+        processRoute();
+        return;
     }
-});
-
-// 🔍 Buscador
-document.addEventListener('DOMContentLoaded', () => {
-
-    document.getElementById('btnBuscar').addEventListener('click', () => {
-        const texto = document.getElementById('buscador').value.toLowerCase();
-
-        const filtrados = destinos.filter(d =>
-            d.nombre.toLowerCase().includes(texto) ||
-            d.region.toLowerCase().includes(texto)
+    
+    renderStatus('loading', 'Cargando destinos turísticos...');
+    
+    try {
+        // Retraso de cortesía visual de 600ms para apreciar el spinner premium
+        await new Promise(resolve => setTimeout(resolve, 600));
+        
+        const res = await fetch('./data/destinos.json');
+        if (!res.ok) {
+            throw new Error('No se pudo leer el archivo de destinos');
+        }
+        const data = await res.json();
+        state.destinos = data.destinos;
+        
+        // Carga exitosa, procesamos la ruta actual
+        processRoute();
+    } catch (err) {
+        console.error('Error cargando destinos:', err);
+        renderStatus(
+            'error',
+            'No fue posible cargar la información turística.',
+            () => cargarDatos()
         );
+    }
+}
 
-        renderLista(filtrados);
+// ==========================================
+// BUSCADOR AVANZADO (DIACRÍTICOS Y MULTI-CAMPO)
+// ==========================================
+function getFilteredDestinos() {
+    return state.destinos.filter(d => {
+        // 1. Filtro por Región Activa
+        if (state.regionActual) {
+            if (d.region.toLowerCase() !== state.regionActual.toLowerCase()) {
+                return false;
+            }
+        }
+        
+        // 2. Filtro por Búsqueda Activa (Nombre, Región, Descripción, Actividades)
+        if (state.busquedaActual) {
+            // Normalizar eliminando acentos/tildes y convirtiendo a minúsculas
+            const query = state.busquedaActual.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            if (query !== "") {
+                const nombreNorm = d.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const regionNorm = d.region.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const descNorm = d.descripcion.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                
+                const matchNombre = nombreNorm.includes(query);
+                const matchRegion = regionNorm.includes(query);
+                const matchDesc = descNorm.includes(query);
+                const matchAct = d.actividades.some(act => 
+                    act.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(query)
+                );
+                
+                if (!matchNombre && !matchRegion && !matchDesc && !matchAct) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
     });
+}
 
-});
-
-// 📍 Filtro por región (pins)
-document.addEventListener('click', (e) => {
-
-    if (e.target.classList.contains('pin')) {
-
-        const region = e.target.innerText;
-
-        const filtrados = destinos.filter(d =>
-            d.region.toLowerCase().includes(region.toLowerCase())
-        );
-
-        renderLista(filtrados);
+// ==========================================
+// ROUTER DE NAVEGACIÓN SPA
+// ==========================================
+function processRoute() {
+    const hash = window.location.hash || '';
+    const oldDestino = state.destinoActual;
+    
+    if (!hash || hash === '#/') {
+        state.destinoActual = null;
+        // Si venía de un detalle y había una región seleccionada, redirigir a esa región
+        if (oldDestino && state.regionActual) {
+            window.location.hash = `#/region/${getSlugFromRegion(state.regionActual)}`;
+            return;
+        }
+        state.regionActual = null;
+    } else if (hash.startsWith('#/region/')) {
+        state.destinoActual = null;
+        const slug = hash.replace('#/region/', '');
+        state.regionActual = getRegionFromSlug(slug);
+    } else if (hash.startsWith('#/destino/')) {
+        state.destinoActual = hash.replace('#/destino/', '');
+        // Auto-detectar la región si la navegación fue directa mediante URL
+        const dest = state.destinos.find(d => d.id === state.destinoActual);
+        if (dest) {
+            state.regionActual = dest.region;
+        }
+    } else if (hash.startsWith('#detalle-')) {
+        // Retrocompatibilidad con destino-card.js que usa #detalle-ID
+        state.destinoActual = hash.replace('#detalle-', '');
+        const dest = state.destinos.find(d => d.id === state.destinoActual);
+        if (dest) {
+            state.regionActual = dest.region;
+        }
+    } else {
+        // Ruta no reconocida, limpiar filtros y volver al inicio
+        state.destinoActual = null;
+        state.regionActual = null;
     }
-});
+    
+    renderApp();
+}
 
-cargarDatos();
+// ==========================================
+// DETECTAR Y SINTONIZAR PINES ACTIVOS
+// ==========================================
+function highlightActivePin() {
+    const pins = document.querySelectorAll('.pin');
+    pins.forEach(pin => {
+        const region = pin.innerText.trim();
+        if (state.regionActual && region.toLowerCase() === state.regionActual.toLowerCase()) {
+            pin.classList.add('pin-active');
+        } else {
+            pin.classList.remove('pin-active');
+        }
+    });
+}
+
+// ==========================================
+// RENDERIZADO Y FLUJO DE VISTAS (APP)
+// ==========================================
+function renderApp() {
+    const heroMap = document.querySelector('.hero-map');
+    const lista = document.getElementById('lista');
+    const detalle = document.getElementById('detalle');
+    
+    // Sincronizar campo de búsqueda (evitando interrumpir si el usuario está escribiendo)
+    const searchInput = document.getElementById('buscador');
+    if (searchInput && document.activeElement !== searchInput) {
+        searchInput.value = state.busquedaActual;
+    }
+    
+    if (state.destinoActual) {
+        // Vista de Detalle
+        heroMap.style.display = 'none';
+        lista.style.display = 'none';
+        detalle.style.display = 'block';
+        
+        detalle.innerHTML = '';
+        const targetDestino = state.destinos.find(d => d.id === state.destinoActual);
+        if (targetDestino) {
+            const detalleComp = document.createElement('destino-detalle');
+            detalleComp.data = targetDestino;
+            detalle.appendChild(detalleComp);
+        } else {
+            // ID inválido, retornar a la lista principal
+            state.destinoActual = null;
+            window.location.hash = '#/';
+        }
+    } else {
+        // Vista de Lista
+        heroMap.style.display = 'block';
+        lista.style.display = 'grid';
+        detalle.style.display = 'none';
+        detalle.innerHTML = '';
+        
+        highlightActivePin();
+        
+        const filtrados = getFilteredDestinos();
+        
+        if (filtrados.length === 0) {
+            renderStatus('no-results', 'No se encontraron destinos para los criterios seleccionados.');
+        } else {
+            lista.innerHTML = '';
+            filtrados.forEach(d => {
+                const card = document.createElement('destino-card');
+                card.data = d;
+                lista.appendChild(card);
+            });
+        }
+    }
+}
+
+// ==========================================
+// CONFIGURACIÓN DE BUSCADOR Y EVENTOS
+// ==========================================
+function setupSearch() {
+    const searchInput = document.getElementById('buscador');
+    const searchBtn = document.getElementById('btnBuscar');
+    
+    if (searchInput) {
+        // Búsqueda dinámica a medida que escribe
+        searchInput.addEventListener('input', () => {
+            state.busquedaActual = searchInput.value;
+            renderApp();
+        });
+        
+        // Búsqueda al presionar Enter
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                state.busquedaActual = searchInput.value;
+                renderApp();
+            }
+        });
+    }
+    
+    if (searchBtn) {
+        // Búsqueda al hacer clic en el botón Buscar
+        searchBtn.addEventListener('click', () => {
+            if (searchInput) {
+                state.busquedaActual = searchInput.value;
+                renderApp();
+            }
+        });
+    }
+}
+
+function setupEventHandlers() {
+    // Escucha de rutas
+    window.addEventListener('hashchange', processRoute);
+    
+    // Clic en Pines del Mapa: navega actualizando el hash
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('pin')) {
+            const region = e.target.innerText.trim();
+            const slug = getSlugFromRegion(region);
+            if (slug) {
+                window.location.hash = `#/region/${slug}`;
+            }
+        }
+    });
+    
+    // ==========================================
+    // ESCUCHA DE EVENTOS PERSONALIZADOS (CUSTOM EVENTS)
+    // ==========================================
+    
+    // Evento: region-selected
+    document.addEventListener('region-selected', (e) => {
+        const regionData = e.detail;
+        const region = typeof regionData === 'string' ? regionData : (regionData?.region || regionData?.slug || regionData?.name);
+        if (region) {
+            const slug = getSlugFromRegion(region.trim());
+            if (slug) {
+                window.location.hash = `#/region/${slug}`;
+            }
+        }
+    });
+    
+    // Evento: destino-selected
+    document.addEventListener('destino-selected', (e) => {
+        const destinoData = e.detail;
+        const id = typeof destinoData === 'string' ? destinoData : destinoData?.id;
+        if (id) {
+            window.location.hash = `#/destino/${id}`;
+        }
+    });
+    
+    // Evento: volver-lista
+    document.addEventListener('volver-lista', () => {
+        if (state.regionActual) {
+            window.location.hash = `#/region/${getSlugFromRegion(state.regionActual)}`;
+        } else {
+            window.location.hash = '#/';
+        }
+    });
+}
+
+// Inicialización
+function init() {
+    setupSearch();
+    setupEventHandlers();
+    cargarDatos();
+}
+
+init();
 
 </script>
 

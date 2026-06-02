@@ -221,7 +221,7 @@ main {
 
 /* ANIMACIÓN */
 .fade-in {
-    animation: fadeUp 0.5s ease;
+    animation: fadeUp 0.5s ease forwards;
 }
 
 @keyframes fadeUp {
@@ -234,3 +234,175 @@ main {
         transform: translateY(0);
     }
 }
+
+/* ==========================================
+   ESTADOS DE INTERFAZ Y MEJORAS SPA (PERSONA 5)
+   ========================================== */
+
+/* Contenedor de estados Premium Glassmorphism */
+#status-container {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 12px 40px 0 rgba(0, 80, 45, 0.08);
+    padding: 40px;
+    text-align: center;
+    margin: 20px 0;
+    transition: all 0.3s ease;
+}
+
+/* Spinner Animado Premium */
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(0, 80, 45, 0.08);
+    border-top-color: #00502d;
+    border-radius: 50%;
+    animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+    margin: 0 auto 24px;
+    box-shadow: 0 0 15px rgba(0, 80, 45, 0.05);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loader-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #00502d;
+    letter-spacing: 0.5px;
+    animation: pulseText 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseText {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Error State */
+.error-content, .no-results-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    max-width: 450px;
+}
+
+.error-icon {
+    font-size: 54px;
+    color: #ff5252;
+    animation: errorPulse 2s infinite;
+}
+
+@keyframes errorPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.error-text {
+    font-size: 17px;
+    color: #c62828;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.btn-retry {
+    background: linear-gradient(135deg, #00502d 0%, #007a44 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 80, 45, 0.25);
+    outline: none;
+}
+
+.btn-retry:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 80, 45, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn-retry:active {
+    transform: translateY(-1px);
+}
+
+/* Sin Resultados */
+.no-results-icon {
+    font-size: 54px;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.no-results-text {
+    font-size: 17px;
+    color: #555;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* Mejoras de Interactividad en Buscador */
+.search-bar {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.search-bar:focus-within {
+    border-color: #00502d;
+    box-shadow: 0 12px 35px rgba(0, 80, 45, 0.25);
+    transform: scale(1.02);
+}
+
+.search-bar button {
+    transition: all 0.3s ease;
+}
+
+.search-bar button:hover {
+    background: #007a44;
+    transform: scale(1.05);
+}
+
+/* Efecto hover interactivo y pulsación de pines del mapa */
+.pin {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pin:hover {
+    transform: scale(1.15) translateY(-2px);
+    background: #007a44;
+    box-shadow: 0 6px 15px rgba(0, 122, 68, 0.4);
+}
+
+.pin.pin-active {
+    background: #007a44;
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 0 15px #007a44, 0 4px 10px rgba(0,0,0,0.3);
+    border-color: white;
+}
