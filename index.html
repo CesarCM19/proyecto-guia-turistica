@@ -59,6 +59,40 @@
     </div>
 
     <section id="detalle" style="display: none;"></section>
+
+    <section id="vista-regiones" style="display: none;" class="fade-in">
+        <div class="section-title">
+            <h2>Regiones de Costa Rica</h2>
+            <p>Selecciona una región para explorar sus destinos maravillosos.</p>
+        </div>
+        <div class="regiones-grid">
+            <div class="region-card" data-region="Caribe">
+                <img src="assets/img/puerto-viejo-portada.jpg" alt="Caribe">
+                <div class="region-overlay"><h3>Caribe</h3></div>
+            </div>
+            <div class="region-card" data-region="Pacífico Norte">
+                <img src="assets/img/tamarindo-portada.jpg" alt="Pacífico Norte">
+                <div class="region-overlay"><h3>Pacífico Norte</h3></div>
+            </div>
+            <div class="region-card" data-region="Central">
+                <img src="assets/img/poas-portada.jpg" alt="Central">
+                <div class="region-overlay"><h3>Central</h3></div>
+            </div>
+            <div class="region-card" data-region="Pacífico Sur">
+                <img src="assets/img/manuel-antonio-portada.jpg" alt="Pacífico Sur">
+                <div class="region-overlay"><h3>Pacífico Sur</h3></div>
+            </div>
+        </div>
+        <style>
+            .regiones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; padding: 24px; }
+            .region-card { position: relative; border-radius: 24px; overflow: hidden; height: 240px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+            .region-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
+            .region-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+            .region-card:hover img { transform: scale(1.05); }
+            .region-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,77,64,0.9) 0%, rgba(0,0,0,0) 60%); display: flex; align-items: flex-end; padding: 24px; }
+            .region-overlay h3 { color: white; margin: 0; font-size: 1.5rem; letter-spacing: -0.5px; }
+        </style>
+    </section>
 </main>
 
 <nav class="bottom-nav">
@@ -94,10 +128,12 @@ function renderLista(lista, titulo = 'Destinos Destacados') {
     const cont = document.getElementById('lista');
     const detalle = document.getElementById('detalle');
     const vistaLista = document.getElementById('vista-lista');
+    const vistaRegiones = document.getElementById('vista-regiones');
     
     document.getElementById('titulo-seccion').textContent = titulo;
     cont.innerHTML = '';
     detalle.style.display = 'none';
+    if(vistaRegiones) vistaRegiones.style.display = 'none';
     vistaLista.style.display = 'block';
 
     lista.forEach(d => {
@@ -110,9 +146,11 @@ function renderLista(lista, titulo = 'Destinos Destacados') {
 function renderDetalle(id) {
     const cont = document.getElementById('detalle');
     const vistaLista = document.getElementById('vista-lista');
+    const vistaRegiones = document.getElementById('vista-regiones');
     const destino = destinos.find(d => d.id === id);
 
     vistaLista.style.display = 'none';
+    if(vistaRegiones) vistaRegiones.style.display = 'none';
     cont.style.display = 'block';
     cont.innerHTML = '';
 
@@ -156,6 +194,21 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Tarjetas de Regiones
+document.addEventListener('click', (e) => {
+    const card = e.target.closest('.region-card');
+    if (card) {
+        const region = card.dataset.region;
+        const filtrados = destinos.filter(d => d.region.toLowerCase().includes(region.toLowerCase()));
+        renderLista(filtrados, 'Región ' + region);
+    }
+});
+
+// Evento del Menú Hamburguesa
+document.addEventListener('abrir-regiones', () => {
+    document.querySelectorAll('.nav-item')[1].click();
+});
+
 document.querySelectorAll('.nav-item').forEach((btn, index) => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -165,11 +218,21 @@ document.querySelectorAll('.nav-item').forEach((btn, index) => {
             renderLista(destinos);
         } else if (index === 1) {
             window.location.hash = '';
-            renderLista(destinos, 'Todas las Regiones');
+            document.getElementById('vista-lista').style.display = 'none';
+            document.getElementById('detalle').style.display = 'none';
+            document.getElementById('vista-regiones').style.display = 'block';
         } else if (index === 2) {
-            alert('Módulo de Audio general en construcción (Fase 3)');
+            alert('El reproductor de audio se encuentra en la vista de detalle de cada destino.');
         } else if (index === 3) {
-            alert('Módulo de Favoritos en construcción (Fase 3)');
+            window.location.hash = '';
+            const guardados = JSON.parse(localStorage.getItem('guardados') || '[]');
+            const filtrados = destinos.filter(d => guardados.includes(d.id));
+            if (filtrados.length === 0) {
+                renderLista([], 'No tienes destinos guardados');
+                document.getElementById('lista').innerHTML = '<p style="padding: 24px; color: #718096; text-align: center; grid-column: 1/-1;">Explora destinos y guárdalos presionando el ícono de corazón.</p>';
+            } else {
+                renderLista(filtrados, 'Mis Destinos Guardados');
+            }
         }
     });
 });

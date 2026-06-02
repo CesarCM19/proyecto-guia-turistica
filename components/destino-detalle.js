@@ -153,22 +153,7 @@ class DestinoDetalle extends HTMLElement {
                     gap: 16px;
                     align-items: center;
                 }
-                .btn-reserve {
-                    background: #004d40;
-                    color: white;
-                    border: none;
-                    padding: 16px 32px;
-                    border-radius: 999px;
-                    font-weight: 600;
-                    font-size: 1.1rem;
-                    cursor: pointer;
-                    transition: transform 0.2s, background 0.2s;
-                    box-shadow: 0 8px 20px rgba(0,77,64,0.2);
-                }
-                .btn-reserve:hover { 
-                    background: #00332a; 
-                    transform: translateY(-2px);
-                }
+
                 .btn-heart {
                     background: #e3f2fd;
                     color: #004d40;
@@ -250,8 +235,9 @@ class DestinoDetalle extends HTMLElement {
                         </div>
                     </div>
                     <div class="action-buttons">
-                        <button class="btn-reserve">Reservar un Guía</button>
-                        <button class="btn-heart" aria-label="Guardar destino"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+                        <button class="btn-heart" aria-label="Guardar destino">
+                            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -279,6 +265,25 @@ class DestinoDetalle extends HTMLElement {
 
         this.querySelector('.btn-volver').addEventListener('click', () => {
             window.location.hash = '';
+        });
+
+        const btnHeart = this.querySelector('.btn-heart');
+        const iconGuardado = '<svg viewBox="0 0 24 24" fill="#e53e3e"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+        const iconNoGuardado = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.1 18.55L12 18.65L11.89 18.55C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5C9.04 5 10.54 6 11.07 7.36H12.93C13.46 6 14.96 5 16.5 5C18.5 5 20 6.5 20 8.5C20 11.39 16.86 14.24 12.1 18.55ZM16.5 3C14.76 3 13.09 3.81 12 5.08C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.42 2 8.5C2 12.28 5.4 15.36 10.55 20.03L12 21.35L13.45 20.03C18.6 15.36 22 12.28 22 8.5C22 5.42 19.58 3 16.5 3Z"/></svg>';
+
+        let guardados = JSON.parse(localStorage.getItem('guardados') || '[]');
+        btnHeart.innerHTML = guardados.includes(this.destino.id) ? iconGuardado : iconNoGuardado;
+
+        btnHeart.addEventListener('click', () => {
+            let guardadosActual = JSON.parse(localStorage.getItem('guardados') || '[]');
+            if (guardadosActual.includes(this.destino.id)) {
+                guardadosActual = guardadosActual.filter(id => id !== this.destino.id);
+                btnHeart.innerHTML = iconNoGuardado;
+            } else {
+                guardadosActual.push(this.destino.id);
+                btnHeart.innerHTML = iconGuardado;
+            }
+            localStorage.setItem('guardados', JSON.stringify(guardadosActual));
         });
 
         const galeriaEl = this.querySelector('galeria-imagenes');

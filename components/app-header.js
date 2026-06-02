@@ -97,6 +97,14 @@ class AppHeader extends HTMLElement {
                 </button>
             </header>
         `;
+
+        const btnMenu = this.shadowRoot.querySelector('button[aria-label="Menú principal"]');
+        btnMenu.addEventListener('click', () => {
+            this.dispatchEvent(new CustomEvent('abrir-regiones', {
+                bubbles: true,
+                composed: true
+            }));
+        });
     }
 }
 
