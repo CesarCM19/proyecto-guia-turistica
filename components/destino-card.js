@@ -4,9 +4,93 @@ class DestinoCard extends HTMLElement {
         this.attachShadow({ mode: 'open' });
     }
 
+    static get observedAttributes() {
+        return [
+            'destino-id',
+            'nombre',
+            'imagen',
+            'region'
+        ];
+    }
+
+    constructor() {
+        super();
+
+        this.attachShadow({ mode: 'open' });
+
+        this.destino = {
+            id: '',
+            nombre: '',
+            imagen_portada: '',
+            region: '',
+            descripcion: ''
+        };
+    }
+
+    connectedCallback() {
+
+        if (!this.destino.id) {
+
+            this.destino.id =
+                this.getAttribute('destino-id') || '';
+
+            this.destino.nombre =
+                this.getAttribute('nombre') || '';
+
+            this.destino.imagen_portada =
+                this.getAttribute('imagen') || '';
+
+            this.destino.region =
+                this.getAttribute('region') || '';
+        }
+
+        this.render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+
+        if (oldValue === newValue) return;
+
+        switch (name) {
+
+            case 'destino-id':
+                this.destino.id = newValue;
+                break;
+
+            case 'nombre':
+                this.destino.nombre = newValue;
+                break;
+
+            case 'imagen':
+                this.destino.imagen_portada = newValue;
+                break;
+
+            case 'region':
+                this.destino.region = newValue;
+                break;
+        }
+
+        this.render();
+    }
+
     set data(destino) {
         this.destino = destino;
         this.render();
+    }
+
+    navegarDetalle() {
+
+        this.dispatchEvent(
+            new CustomEvent('destino-selected', {
+                bubbles: true,
+                composed: true,
+                detail: {
+                    id: this.destino.id
+                }
+            })
+        );
+
+        window.location.hash = `#detalle-${this.destino.id}`;
     }
 
     render() {
@@ -122,6 +206,7 @@ class DestinoCard extends HTMLElement {
                     </div>
                     <p>${this.destino.descripcion}</p>
                 </div>
+
             </article>
         `;
 
