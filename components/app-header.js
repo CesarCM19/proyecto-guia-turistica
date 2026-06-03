@@ -105,6 +105,19 @@ class AppHeader extends HTMLElement {
                 composed: true
             }));
         });
+
+        const links = this.shadowRoot.querySelectorAll('.nav-link');
+        links.forEach((link, idx) => {
+            link.addEventListener('click', () => {
+                links.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                this.dispatchEvent(new CustomEvent('nav-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { index: idx }
+                }));
+            });
+        });
     }
 }
 

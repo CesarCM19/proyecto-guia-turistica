@@ -118,11 +118,22 @@
 <script type="module">
 let destinos = [];
 
+const state = {
+    destinos: [],
+    regionActual: '',
+    busquedaActual: ''
+};
+
+const regionToSlug = {
+    'Caribe': 'caribe',
+    'Pacífico Norte': 'pacifico-norte',
+    'Central': 'central',
+    'Pacífico Sur': 'sur'
+};
+
 function getSlugFromRegion(region) {
     if (!region) return '';
-    // Mapeo directo
     if (regionToSlug[region]) return regionToSlug[region];
-    // Normalización de seguridad por si cambia el texto
     const norm = region.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     if (norm.includes('norte')) return 'pacifico-norte';
     if (norm.includes('sur')) return 'sur';
@@ -145,6 +156,17 @@ function renderLista(lista, titulo = 'Destinos Destacados') {
     if(vistaAudios) vistaAudios.style.display = 'none';
     vistaLista.style.display = 'block';
 
+    if (lista.length === 0) {
+        cont.innerHTML = '<p style="padding: 24px; color: #718096; text-align: center; grid-column: 1/-1;">No se encontraron destinos para los criterios seleccionados.</p>';
+    } else {
+        lista.forEach(d => {
+            const card = document.createElement('destino-card');
+            card.data = d;
+            cont.appendChild(card);
+        });
+    }
+}
+
 // ==========================================
 // BUSCADOR AVANZADO (DIACRÍTICOS Y MULTI-CAMPO)
 // ==========================================
@@ -159,7 +181,6 @@ function getFilteredDestinos() {
         
         // 2. Filtro por Búsqueda Activa (Nombre, Región, Descripción, Actividades)
         if (state.busquedaActual) {
-            // Normalizar eliminando acentos/tildes y convirtiendo a minúsculas
             const query = state.busquedaActual.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             if (query !== "") {
                 const nombreNorm = d.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -188,7 +209,9 @@ function renderDetalle(id) {
     const vistaLista = document.getElementById('vista-lista');
     const vistaRegiones = document.getElementById('vista-regiones');
     const vistaAudios = document.getElementById('vista-audios');
-    const destino = destinos.find(d => d.id === id);
+    const destino = state.destinos.find(d => d.id === id);
+
+    if (!destino) return;
 
     vistaLista.style.display = 'none';
     if(vistaRegiones) vistaRegiones.style.display = 'none';
@@ -201,45 +224,6 @@ function renderDetalle(id) {
     cont.appendChild(detalle);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-window.addEventListener('hashchange', () => {
-    const hash = window.location.hash;
-    if (hash.includes('detalle')) {
-        const id = hash.replace('#detalle-', '');
-        renderDetalle(id);
-    } else {
-        // Vista de Lista
-        heroMap.style.display = 'block';
-        lista.style.display = 'grid';
-        detalle.style.display = 'none';
-        detalle.innerHTML = '';
-        
-        highlightActivePin();
-        
-        const filtrados = getFilteredDestinos();
-        
-        if (filtrados.length === 0) {
-            renderStatus('no-results', 'No se encontraron destinos para los criterios seleccionados.');
-        } else {
-            lista.innerHTML = '';
-            filtrados.forEach(d => {
-                const card = document.createElement('destino-card');
-                card.data = d;
-                lista.appendChild(card);
-            });
-        }
-    }
-});
-
-// Buscador
-document.getElementById('btnBuscar').addEventListener('click', () => {
-    const texto = document.getElementById('buscador').value.toLowerCase();
-    const filtrados = destinos.filter(d =>
-        d.nombre.toLowerCase().includes(texto) ||
-        d.region.toLowerCase().includes(texto)
-    );
-    renderLista(filtrados, 'Resultados de Búsqueda');
-});
 
 // Relación de destinos y provincias geográficas de Costa Rica
 const provinciaDeDestino = {
@@ -259,7 +243,7 @@ function mostrarExploradorProvincia(idProvincia, nombreProvincia) {
     if (!panel) return;
 
     // Filtrar destinos por provincia
-    const destinosProv = destinos.filter(d => provinciaDeDestino[d.id] === nombreProvincia);
+    const destinosProv = state.destinos.filter(d => provinciaDeDestino[d.id] === nombreProvincia);
 
     // Actualizar la lista en el grid secundario
     renderLista(destinosProv, 'Destinos en ' + nombreProvincia);
@@ -390,14 +374,66 @@ function restaurarVistaLista() {
             </div>
         `;
     }
-    renderLista(destinos);
+    
+    // Limpiar barra de búsqueda
+    state.busquedaActual = '';
+    const buscadorInput = document.getElementById('buscador');
+    if (buscadorInput) buscadorInput.value = '';
+
+    renderLista(state.destinos);
 }
 
-// Escuchar eventos del componente de mapa
-document.addEventListener('DOMContentLoaded', () => {
-    // Al ser script type="module" el DOM ya está cargado, pero es una buena práctica
+// Escuchar cambios de Hash en la navegación
+window.addEventListener('hashchange', () => {
+    const hash = window.location.hash;
+    if (hash.includes('detalle')) {
+        const id = hash.replace('#detalle-', '');
+        renderDetalle(id);
+    } else {
+        // Regresar a la vista de lista/explorar
+        const vistaLista = document.getElementById('vista-lista');
+        const detalle = document.getElementById('detalle');
+        const heroMap = document.querySelector('.hero-map');
+        const listaEl = document.getElementById('lista');
+        
+        if (heroMap) heroMap.style.display = 'block';
+        if (listaEl) listaEl.style.display = 'grid';
+        if (vistaLista) vistaLista.style.display = 'block';
+        if (detalle) {
+            detalle.style.display = 'none';
+            detalle.innerHTML = '';
+        }
+        
+        // Si hay una provincia seleccionada en el mapa, restauramos su explorador en lugar de reiniciar todo
+        const mapa = document.getElementById('mapa-guia');
+        if (mapa && mapa.selectedProvinceId) {
+            const prov = mapa.provincias.find(p => p.id === mapa.selectedProvinceId);
+            if (prov) {
+                mostrarExploradorProvincia(prov.id, prov.name);
+                return;
+            }
+        }
+        
+        restaurarVistaLista();
+    }
 });
 
+// Buscador
+function ejecutarBusqueda() {
+    const texto = document.getElementById('buscador').value;
+    state.busquedaActual = texto;
+    const filtrados = getFilteredDestinos();
+    renderLista(filtrados, texto ? `Resultados de Búsqueda` : 'Destinos Destacados');
+}
+
+document.getElementById('btnBuscar').addEventListener('click', ejecutarBusqueda);
+document.getElementById('buscador').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        ejecutarBusqueda();
+    }
+});
+
+// Escuchar eventos del componente de mapa
 setTimeout(() => {
     const mapa = document.getElementById('mapa-guia');
     if (mapa) {
@@ -415,23 +451,55 @@ document.addEventListener('click', (e) => {
     const card = e.target.closest('.region-card');
     if (card) {
         const region = card.dataset.region;
-        const filtrados = destinos.filter(d => d.region.toLowerCase().includes(region.toLowerCase()));
+        const filtrados = state.destinos.filter(d => d.region.toLowerCase().includes(region.toLowerCase()));
+        
+        // Cambiar active visual en los nav items superiores e inferiores a "Explorar"
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(el => el.classList.remove('active'));
+        if (navItems[0]) navItems[0].classList.add('active');
+
+        const appHeader = document.querySelector('app-header');
+        if (appHeader && appHeader.shadowRoot) {
+            const topLinks = appHeader.shadowRoot.querySelectorAll('.nav-link');
+            topLinks.forEach(el => el.classList.remove('active'));
+            if (topLinks[0]) topLinks[0].classList.add('active');
+        }
+
         renderLista(filtrados, 'Región ' + region);
     }
 });
 
 // Evento del Menú Hamburguesa
 document.addEventListener('abrir-regiones', () => {
-    document.querySelectorAll('.nav-item')[1].click();
+    const navItems = document.querySelectorAll('.nav-item');
+    if (navItems[1]) navItems[1].click();
 });
 
+// Manejo de la Navegación Inferior
 document.querySelectorAll('.nav-item').forEach((btn, index) => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         btn.classList.add('active');
+        
+        // Sincronizar visualmente el app-header
+        const appHeader = document.querySelector('app-header');
+        if (appHeader && appHeader.shadowRoot) {
+            const topLinks = appHeader.shadowRoot.querySelectorAll('.nav-link');
+            topLinks.forEach(el => el.classList.remove('active'));
+            if (topLinks[index]) topLinks[index].classList.add('active');
+        }
+
         if (index === 0) {
             window.location.hash = '';
-            renderLista(destinos);
+            state.regionActual = '';
+            state.busquedaActual = '';
+            const buscadorInput = document.getElementById('buscador');
+            if (buscadorInput) buscadorInput.value = '';
+            
+            const mapa = document.getElementById('mapa-guia');
+            if (mapa) mapa.deseleccionarTodo();
+
+            renderLista(state.destinos);
         } else if (index === 1) {
             window.location.hash = '';
             document.getElementById('vista-lista').style.display = 'none';
@@ -448,8 +516,8 @@ document.querySelectorAll('.nav-item').forEach((btn, index) => {
             vistaAudios.style.display = 'block';
             
             const contAudios = document.getElementById('lista-audios');
-            if (contAudios.children.length === 0) {
-                destinos.filter(d => d.audio).forEach(d => {
+            if (contAudios && contAudios.children.length === 0) {
+                state.destinos.filter(d => d.audio).forEach(d => {
                     const audioGuia = document.createElement('audio-guia');
                     audioGuia.setAttribute('src', d.audio);
                     audioGuia.setAttribute('label', 'Guía de ' + d.nombre);
@@ -460,7 +528,7 @@ document.querySelectorAll('.nav-item').forEach((btn, index) => {
         } else if (index === 3) {
             window.location.hash = '';
             const guardados = JSON.parse(localStorage.getItem('guardados') || '[]');
-            const filtrados = destinos.filter(d => guardados.includes(d.id));
+            const filtrados = state.destinos.filter(d => guardados.includes(d.id));
             if (filtrados.length === 0) {
                 renderLista([], 'No tienes destinos guardados');
                 document.getElementById('lista').innerHTML = '<p style="padding: 24px; color: #718096; text-align: center; grid-column: 1/-1;">Explora destinos y guárdalos presionando el ícono de corazón.</p>';
@@ -470,6 +538,38 @@ document.querySelectorAll('.nav-item').forEach((btn, index) => {
         }
     });
 });
+
+// Escuchar eventos de navegación de app-header
+document.querySelector('app-header').addEventListener('nav-change', (e) => {
+    const bottomNavItems = document.querySelectorAll('.bottom-nav .nav-item');
+    if (bottomNavItems[e.detail.index]) {
+        bottomNavItems[e.detail.index].click();
+    }
+});
+
+// Cargar y Parsear Datos Iniciales
+async function cargarDatos() {
+    try {
+        const response = await fetch('data/destinos.json');
+        if (!response.ok) throw new Error('No se pudo cargar destinos.json');
+        const data = await response.json();
+        state.destinos = data.destinos;
+        destinos = data.destinos; // compatibilidad
+        
+        const hash = window.location.hash;
+        if (hash.includes('detalle')) {
+            const id = hash.replace('#detalle-', '');
+            renderDetalle(id);
+        } else {
+            renderLista(state.destinos);
+        }
+    } catch (error) {
+        console.error('Error al cargar datos:', error);
+        const cont = document.getElementById('lista');
+        if (cont) {
+            cont.innerHTML = `<p style="padding: 24px; color: red; text-align: center; grid-column: 1/-1;">Error al cargar los destinos: ${error.message}</p>`;
+        }
+    }
 }
 
 cargarDatos();
