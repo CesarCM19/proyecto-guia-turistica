@@ -85,8 +85,6 @@ class DestinoCard extends HTMLElement {
                 }
             })
         );
-
-        window.location.hash = `#detalle-${this.destino.id}`;
     }
 
     render() {
@@ -207,10 +205,9 @@ class DestinoCard extends HTMLElement {
         `;
 
         const card = this.shadowRoot.querySelector('.card');
-        const destinoId = this.destino.id;
-        card.addEventListener('click', () => { window.location.hash = '#detalle-' + destinoId; });
+        card.addEventListener('click', () => { this.navegarDetalle(); });
         card.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') window.location.hash = '#detalle-' + destinoId;
+            if (e.key === 'Enter') this.navegarDetalle();
         });
     }
 }
