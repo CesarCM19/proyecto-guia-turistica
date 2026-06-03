@@ -231,144 +231,25 @@ const provinciaDeDestino = {
     "sur-002": "Puntarenas"      // Uvita
 };
 
-// Función para actualizar y mostrar el panel explorador de provincias
+// Función para mostrar destinos filtrados por provincia al seleccionar en el mapa
 function mostrarExploradorProvincia(idProvincia, nombreProvincia) {
-    const panel = document.getElementById('panel-explorador');
-    if (!panel) return;
-
     // Filtrar destinos por provincia
     const destinosProv = state.destinos.filter(d => provinciaDeDestino[d.id] === nombreProvincia);
 
-    // Actualizar la lista en el grid secundario
-    renderLista(destinosProv, 'Destinos en ' + nombreProvincia);
-    
-    // Si la provincia tiene destinos, renderizar el panel detallado del explorador
     if (destinosProv.length > 0) {
-        panel.innerHTML = `
-            <div class="fade-in-slide">
-                <div class="province-header">
-                    <h3 class="province-title">${nombreProvincia}</h3>
-                    <span class="province-meta">Explorador de Destinos</span>
-                </div>
-                
-                <div class="destination-tabs" role="tablist">
-                    ${destinosProv.map((d, index) => `
-                        <button class="dest-tab ${index === 0 ? 'active' : ''}" 
-                                role="tab" 
-                                aria-selected="${index === 0 ? 'true' : 'false'}" 
-                                data-id="${d.id}">
-                            ${d.nombre}
-                        </button>
-                    `).join('')}
-                </div>
-                
-                <div id="explorer-dest-content" class="explorer-body">
-                    <!-- Se rellenará dinámicamente con el destino activo -->
-                </div>
-            </div>
-        `;
-
-        // Añadir manejadores a los botones de pestañas
-        const tabs = panel.querySelectorAll('.dest-tab');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                tab.classList.add('active');
-                tab.setAttribute('aria-selected', 'true');
-                
-                const destId = tab.getAttribute('data-id');
-                const dest = destinosProv.find(d => d.id === destId);
-                actualizarContenidoDestinoExplorer(dest);
-            });
-        });
-
-        // Mostrar por defecto el primer destino
-        actualizarContenidoDestinoExplorer(destinosProv[0]);
-
+        renderLista(destinosProv, 'Destinos en ' + nombreProvincia);
     } else {
-        // Estado vacío para provincias sin destinos
-        panel.innerHTML = `
-            <div class="welcome-panel fade-in-slide">
-                <div class="welcome-icon">🌴</div>
-                <h3 class="welcome-title">${nombreProvincia}</h3>
-                <p class="welcome-desc" style="max-width: 320px; margin-bottom: 20px;">
-                    Esta hermosa provincia es parte de la gran riqueza natural costarricense. Actualmente no cuenta con guías multimedia cargadas en nuestro sistema.
-                </p>
-                <button id="btn-reset-map" class="dest-tab active" style="margin-top: 10px;">Ver todos los destinos</button>
-            </div>
+        renderLista([], nombreProvincia);
+        document.getElementById('lista').innerHTML = `
+            <p style="padding: 24px; color: #718096; text-align: center; grid-column: 1/-1;">
+                Esta hermosa provincia actualmente no cuenta con guías cargadas en nuestro sistema.
+            </p>
         `;
-
-        const btnReset = panel.querySelector('#btn-reset-map');
-        if (btnReset) {
-            btnReset.addEventListener('click', () => {
-                const mapa = document.getElementById('mapa-guia');
-                if (mapa) mapa.deseleccionarTodo();
-            });
-        }
-    }
-}
-
-// Función para renderizar el contenido multimedia detallado de un destino dentro del explorador
-function actualizarContenidoDestinoExplorer(destino) {
-    const container = document.getElementById('explorer-dest-content');
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="explorer-info fade-in-slide">
-            <h4>${destino.nombre}</h4>
-            <p>${destino.descripcion}</p>
-            
-            <h5 style="color: var(--primary-dark); font-weight: 600; margin-bottom: 8px;">Actividades populares:</h5>
-            <div class="explorer-activities">
-                ${destino.actividades.map(act => `<span class="activity-tag">${act}</span>`).join('')}
-            </div>
-        </div>
-
-        <div class="explorer-media fade-in-slide" style="display: flex; flex-direction: column; gap: 16px;">
-            <galeria-imagenes id="explorer-galeria"></galeria-imagenes>
-            <audio-guia id="explorer-audio"></audio-guia>
-            <button class="dest-tab active" id="btn-ver-mas-explorer" style="width: 100%; border: none; font-weight: 700; padding: 12px; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(0,77,64,0.15); margin-top: 8px;">
-                Ver ficha completa del destino
-            </button>
-        </div>
-    `;
-
-    // Inicializar componentes multimedia
-    const galeria = container.querySelector('#explorer-galeria');
-    if (galeria && destino.galeria) {
-        galeria.setAttribute('imagenes', JSON.stringify(destino.galeria));
-    }
-
-    const audio = container.querySelector('#explorer-audio');
-    if (audio && destino.audio) {
-        audio.setAttribute('src', destino.audio);
-        audio.setAttribute('label', `Guía de ${destino.nombre}`);
-    }
-
-    const btnVerMas = container.querySelector('#btn-ver-mas-explorer');
-    if (btnVerMas) {
-        btnVerMas.addEventListener('click', () => {
-            window.location.hash = '#detalle-' + destino.id;
-        });
     }
 }
 
 // Función para restaurar la lista original al deseleccionar en el mapa
 function restaurarVistaLista() {
-    const panel = document.getElementById('panel-explorador');
-    if (panel) {
-        panel.innerHTML = `
-            <div class="welcome-panel fade-in-slide">
-                <div class="welcome-icon">🗺️</div>
-                <h3 class="welcome-title">Explora Costa Rica</h3>
-                <p class="welcome-desc">Selecciona una provincia en el mapa interactivo para descubrir sus secretos, galerías y narraciones de audio en tiempo real.</p>
-            </div>
-        `;
-    }
-    
     // Limpiar barra de búsqueda
     state.busquedaActual = '';
     const buscadorInput = document.getElementById('buscador');
