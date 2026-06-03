@@ -25,7 +25,7 @@ class MapaTuristico extends HTMLElement {
                     :host {
                         display: block;
                         width: 100%;
-                        max-width: 950px;
+                        max-width: 100%;
                         margin: 0 auto;
                         position: relative;
                         user-select: none;
@@ -40,7 +40,7 @@ class MapaTuristico extends HTMLElement {
                     svg {
                         width: 100%;
                         height: auto;
-                        max-height: 650px;
+                        max-height: 800px;
                         display: block;
                         overflow: visible;
                     }
