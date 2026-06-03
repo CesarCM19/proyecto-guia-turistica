@@ -264,7 +264,10 @@ class DestinoDetalle extends HTMLElement {
         `;
 
         this.querySelector('.btn-volver').addEventListener('click', () => {
-            window.location.hash = '';
+            this.dispatchEvent(new CustomEvent('volver-lista', {
+                bubbles: true,
+                composed: true
+            }));
         });
 
         const btnHeart = this.querySelector('.btn-heart');
