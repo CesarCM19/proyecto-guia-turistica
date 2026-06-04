@@ -79,13 +79,13 @@ function renderStatus(tipo, mensaje) {
     if (tipo === 'loading') {
         cont.innerHTML = `
             <div style="grid-column:1/-1; text-align:center; padding:60px 24px; color:var(--text-sec);">
-                <div style="font-size:2.5rem; margin-bottom:12px; animation: bounce-slow 1.5s infinite;">🌿</div>
+                <div style="font-size:2.5rem; margin-bottom:12px; animation: bounce-slow 1.5s infinite;"></div>
                 <p style="font-size:1rem; font-weight:600;">Cargando destinos…</p>
             </div>`;
     } else if (tipo === 'error') {
         cont.innerHTML = `
             <div style="grid-column:1/-1; text-align:center; padding:60px 24px; color:#e53e3e;">
-                <div style="font-size:2.5rem; margin-bottom:12px;">⚠️</div>
+                <div style="font-size:2.5rem; margin-bottom:12px;"></div>
                 <p style="font-size:1rem; font-weight:600; margin-bottom:16px;">${mensaje}</p>
                 <button id="btn-reintentar" style="background:var(--primary-dark);color:white;border:none;padding:12px 28px;border-radius:999px;font-weight:600;cursor:pointer;font-size:0.95rem;">
                     Reintentar
@@ -96,7 +96,7 @@ function renderStatus(tipo, mensaje) {
     } else if (tipo === 'no-results') {
         cont.innerHTML = `
             <div style="grid-column:1/-1; text-align:center; padding:60px 24px; color:var(--text-sec);">
-                <div style="font-size:2.5rem; margin-bottom:12px;">🔍</div>
+                <div style="font-size:2.5rem; margin-bottom:12px;"></div>
                 <p style="font-size:1rem; font-weight:600;">${mensaje}</p>
             </div>`;
     }
