@@ -2,15 +2,15 @@
 :root {
     --primary-dark: #004d40;
     --primary-light: #e0f2f1;
-    --bg-app: #f8f9fa;
+    --bg-app: #f5f7f6;
     --bg-card: #ffffff;
     --text-main: #1a1a1a;
     --text-sec: #4a5568;
     --accent: #e3f2fd;
     --border-radius-card: 24px;
     --border-radius-pill: 999px;
-    --shadow-soft: 0 8px 30px rgba(0,0,0,0.08);
-    --shadow-hover: 0 12px 40px rgba(0,0,0,0.12);
+    --shadow-soft: 0 10px 30px rgba(0, 77, 64, 0.04);
+    --shadow-hover: 0 16px 40px rgba(0, 77, 64, 0.08);
 }
 
 * {
@@ -21,7 +21,12 @@
 
 body {
     font-family: system-ui, -apple-system, sans-serif;
-    background: var(--bg-app);
+    background-color: var(--bg-app);
+    background-image: linear-gradient(rgba(245, 247, 246, 0.55), rgba(245, 247, 246, 0.55)), url('../assets/img/costa-rica-bg.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    background-size: cover;
     color: var(--text-main);
     padding-bottom: 90px;
 }
@@ -402,4 +407,48 @@ main {
     margin: 0;
     font-size: 1.5rem;
     letter-spacing: -0.5px;
+}
+
+/* REGIONAL BACKGROUND WATERMARKS */
+body.bg-caribe {
+    background-image: linear-gradient(rgba(245, 247, 246, 0.55), rgba(245, 247, 246, 0.55)), url('../assets/img/region-caribe-bg.png') !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+}
+body.bg-pacifico-norte {
+    background-image: linear-gradient(rgba(245, 247, 246, 0.55), rgba(245, 247, 246, 0.55)), url('../assets/img/region-pacifico-norte-bg.png') !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+}
+body.bg-central {
+    background-image: linear-gradient(rgba(245, 247, 246, 0.55), rgba(245, 247, 246, 0.55)), url('../assets/img/region-central-bg.png') !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+}
+body.bg-pacifico-sur {
+    background-image: linear-gradient(rgba(245, 247, 246, 0.55), rgba(245, 247, 246, 0.55)), url('../assets/img/region-pacifico-sur-bg.png') !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* CUSTOM ANIMATIONS */
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.1); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.1); }
+    70% { transform: scale(1); }
+}
+
+.fade-in-slide {
+    animation: fadeInSlide 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
