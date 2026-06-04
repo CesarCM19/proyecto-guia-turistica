@@ -1,13 +1,12 @@
 class AppHeader extends HTMLElement {
     static get observedAttributes() {
-        return ['active-region'];
+        return ['active-region', 'location'];
     }
 
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
         this._activeRegion = null;
-        this._hashChangeHandler = () => this.syncActiveTab();
     }
     
     connectedCallback() {
@@ -18,9 +17,9 @@ class AppHeader extends HTMLElement {
                     position: fixed;
                     top: 0;
                     width: 100%;
-                    z-index: 1000;
-                    background: rgba(255, 255, 255, 0.98);
-                    backdrop-filter: blur(8px);
+                    z-index: 2000;
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(12px);
                     border-bottom: 1px solid #edf2f7;
                     font-family: system-ui, -apple-system, sans-serif;
                 }
@@ -48,6 +47,7 @@ class AppHeader extends HTMLElement {
                     justify-content: center;
                     padding: 8px;
                     border-radius: 8px;
+                    transition: background 0.2s;
                 }
                 .btn-icon:hover {
                     background: #f4f6f8;
@@ -63,136 +63,206 @@ class AppHeader extends HTMLElement {
                     font-weight: 700;
                     margin: 0;
                     letter-spacing: -0.5px;
-                }
-                .nav-links {
-                    display: none;
-                    gap: 32px;
-                    align-items: center;
-                }
-                @media (min-width: 768px) {
-                    .nav-links { display: flex; }
-                }
-                .nav-link {
-                    color: #4a5568;
-                    text-decoration: none;
-                    font-weight: 500;
-                    font-size: 0.95rem;
                     cursor: pointer;
-                    transition: color 0.2s;
-                    display: inline-flex;
-                    align-items: center;
                     user-select: none;
+                    transition: opacity 0.2s;
                 }
-                .nav-link:hover, .nav-link.active {
-                    color: #004d40;
+                h1:hover {
+                    opacity: 0.85;
                 }
                 
-                /* DROPDOWN STYLES */
-                .dropdown {
-                    position: relative;
-                    display: inline-block;
-                }
-                .dropdown-content {
-                    display: none;
-                    position: absolute;
-                    top: 100%;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background-color: white;
-                    min-width: 180px;
-                    box-shadow: 0px 8px 24px rgba(0,0,0,0.12);
-                    z-index: 1010;
-                    border-radius: 16px;
-                    padding: 8px 0;
-                    margin-top: 12px;
-                    border: 1px solid #edf2f7;
-                    animation: fadeIn 0.2s ease-out;
-                }
-                .dropdown:hover .dropdown-content {
-                    display: block;
-                }
-                .dropdown-item {
-                    color: #4a5568;
-                    padding: 12px 20px;
-                    text-decoration: none;
-                    display: block;
-                    font-weight: 500;
+                .location-chip {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: #e0f2f1;
+                    color: #004d40;
+                    border-radius: 99px;
+                    padding: 6px 14px;
                     font-size: 0.9rem;
+                    font-weight: 600;
+                    border: 1px solid #b2dfdb;
+                    transition: all 0.2s ease;
+                }
+                .location-chip svg {
+                    width: 16px;
+                    height: 16px;
+                    fill: currentColor;
+                }
+
+                /* DRAWER STYLE */
+                .drawer-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 77, 64, 0.4);
+                    backdrop-filter: blur(4px);
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.3s ease;
+                    z-index: 1009;
+                }
+                .drawer-overlay.open {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+                .drawer {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    height: 100vh;
+                    width: 280px;
+                    max-width: 85%;
+                    background: #ffffff !important;
+                    box-shadow: 8px 0 30px rgba(0, 77, 64, 0.15);
+                    z-index: 1010;
+                    transform: translateX(-100%);
+                    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+                    display: flex;
+                    flex-direction: column;
+                }
+                .drawer.open {
+                    transform: translateX(0);
+                }
+                .drawer-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 20px 24px;
+                    border-bottom: 1px solid #edf2f7;
+                }
+                .drawer-header h2 {
+                    font-size: 1.3rem;
+                    color: #004d40;
+                    margin: 0;
+                    font-weight: 750;
+                    letter-spacing: -0.5px;
+                }
+                .btn-close {
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    color: #4a5568;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 6px;
+                    border-radius: 50%;
+                    transition: background-color 0.2s;
+                }
+                .btn-close:hover {
+                    background-color: #f4f6f8;
+                }
+                .btn-close svg {
+                    width: 20px;
+                    height: 20px;
+                    fill: currentColor;
+                }
+                .drawer-content {
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .drawer-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 16px;
+                    border-radius: 12px;
+                    color: #4a5568;
+                    font-weight: 600;
                     cursor: pointer;
                     transition: background-color 0.2s, color 0.2s;
-                    text-align: left;
-                    white-space: nowrap;
                 }
-                .dropdown-item:hover, .dropdown-item.active {
+                .drawer-item:hover {
+                    background-color: #f0f4f8;
+                    color: #004d40;
+                }
+                .drawer-item.active {
                     background-color: #e0f2f1;
                     color: #004d40;
-                    font-weight: 600;
                 }
-                
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translate(-50%, 4px); }
-                    to { opacity: 1; transform: translate(-50%, 0); }
+                .region-dot {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
                 }
+                .region-dot.caribe { background: #009688; }
+                .region-dot.pacifico-norte { background: #3f51b5; }
+                .region-dot.central { background: #ff9800; }
+                .region-dot.pacifico-sur { background: #e91e63; }
             </style>
             
             <header class="top-nav">
                 <div class="left-section">
-                    <button class="btn-icon" aria-label="Menú principal">
+                    <button class="btn-icon btn-menu" aria-label="Menú principal">
                         <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
                     </button>
-                    <h1>Guía Turística de Costa Rica</h1>
+                    <h1 id="nav-title">Guía Turística de Costa Rica</h1>
                 </div>
                 
-                <div class="nav-links">
-                    <span class="nav-link" id="nav-explorar">Explorar</span>
-                    <div class="dropdown">
-                        <span class="nav-link" id="nav-regiones">
-                            Regiones
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-left: 4px; transition: transform 0.2s;"><path d="M7 10l5 5 5-5z"/></svg>
-                        </span>
-                        <div class="dropdown-content">
-                            <span class="dropdown-item" data-region="Caribe">Caribe</span>
-                            <span class="dropdown-item" data-region="Pacífico Norte">Pacífico Norte</span>
-                            <span class="dropdown-item" data-region="Central">Central</span>
-                            <span class="dropdown-item" data-region="Pacífico Sur">Pacífico Sur</span>
-                        </div>
-                    </div>
-                    <span class="nav-link" id="nav-audio">Audio</span>
-                </div>
-                
-                <button class="btn-icon" aria-label="Ver mapa">
+                <div class="location-chip" id="location-btn">
                     <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                </button>
+                    <span id="location-text">Costa Rica</span>
+                </div>
             </header>
+
+            <div class="drawer-overlay" id="drawer-overlay"></div>
+            <div class="drawer" id="drawer">
+                <div class="drawer-header">
+                    <h2>Regiones</h2>
+                    <button class="btn-close" id="btn-close-drawer" aria-label="Cerrar menú">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+                <div class="drawer-content">
+                    <div class="drawer-item" data-region="Caribe">
+                        <span class="region-dot caribe"></span>
+                        <span>Caribe</span>
+                    </div>
+                    <div class="drawer-item" data-region="Pacífico Norte">
+                        <span class="region-dot pacifico-norte"></span>
+                        <span>Pacífico Norte</span>
+                    </div>
+                    <div class="drawer-item" data-region="Central">
+                        <span class="region-dot central"></span>
+                        <span>Central</span>
+                    </div>
+                    <div class="drawer-item" data-region="Pacífico Sur">
+                        <span class="region-dot pacifico-sur"></span>
+                        <span>Pacífico Sur</span>
+                    </div>
+                </div>
+            </div>
         `;
 
-        const btnMenu = this.shadowRoot.querySelector('button[aria-label="Menú principal"]');
-        btnMenu.addEventListener('click', () => {
-            this.dispatchEvent(new CustomEvent('abrir-regiones', {
-                bubbles: true,
-                composed: true
-            }));
+        // Toggles del Drawer
+        const btnMenu = this.shadowRoot.querySelector('.btn-menu');
+        const btnClose = this.shadowRoot.getElementById('btn-close-drawer');
+        const overlay = this.shadowRoot.getElementById('drawer-overlay');
+        const drawer = this.shadowRoot.getElementById('drawer');
+
+        const toggleDrawer = (show) => {
+            drawer.classList.toggle('open', show);
+            overlay.classList.toggle('open', show);
+        };
+
+        btnMenu.addEventListener('click', () => toggleDrawer(true));
+        btnClose.addEventListener('click', () => toggleDrawer(false));
+        overlay.addEventListener('click', () => toggleDrawer(false));
+
+        // Click en el título (Home)
+        const title = this.shadowRoot.getElementById('nav-title');
+        title.addEventListener('click', () => {
+            window.location.hash = '#/';
         });
 
-        const links = this.shadowRoot.querySelectorAll('.nav-link');
-        links.forEach((link, idx) => {
-            link.addEventListener('click', () => {
-                links.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                this.dispatchEvent(new CustomEvent('nav-change', {
-                    bubbles: true,
-                    composed: true,
-                    detail: { index: idx }
-                }));
-            });
-        });
-
-        // Configurar los items del menú desplegable de regiones
-        const dropdownItems = this.shadowRoot.querySelectorAll('.dropdown-item');
-        dropdownItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation(); // Evitar que se propague el evento al botón de regiones padre
+        // Click en items del drawer
+        const drawerItems = this.shadowRoot.querySelectorAll('.drawer-item');
+        drawerItems.forEach(item => {
+            item.addEventListener('click', () => {
                 const regionName = item.getAttribute('data-region');
+                toggleDrawer(false);
                 this.dispatchEvent(new CustomEvent('region-selected', {
                     bubbles: true,
                     composed: true,
@@ -201,13 +271,12 @@ class AppHeader extends HTMLElement {
             });
         });
 
-        // Sincronización de ruta activa al arrancar
-        this.syncActiveTab();
-        window.addEventListener('hashchange', this._hashChangeHandler);
+        this.updateActiveRegionState();
     }
 
     disconnectedCallback() {
-        window.removeEventListener('hashchange', this._hashChangeHandler);
+        // No hashchange event listener is bound on window now inside app-header,
+        // which prevents memory leaks and complies with the unbinding design.
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -215,46 +284,30 @@ class AppHeader extends HTMLElement {
             this._activeRegion = newValue;
             this.updateActiveRegionState();
         }
+        if (name === 'location' && oldValue !== newValue) {
+            this.updateLocationText(newValue);
+        }
     }
 
     updateActiveRegionState() {
         if (!this.shadowRoot) return;
-        const dropdownItems = this.shadowRoot.querySelectorAll('.dropdown-item');
-        const parentLinkRegiones = this.shadowRoot.querySelector('#nav-regiones');
-        
-        dropdownItems.forEach(item => item.classList.remove('active'));
+        const drawerItems = this.shadowRoot.querySelectorAll('.drawer-item');
+        drawerItems.forEach(item => item.classList.remove('active'));
 
         if (this._activeRegion) {
-            let found = false;
-            dropdownItems.forEach(item => {
+            drawerItems.forEach(item => {
                 if (item.getAttribute('data-region').toLowerCase() === this._activeRegion.toLowerCase()) {
                     item.classList.add('active');
-                    found = true;
                 }
             });
-            if (found && parentLinkRegiones) {
-                parentLinkRegiones.classList.add('active');
-            }
         }
     }
 
-    syncActiveTab() {
+    updateLocationText(text) {
         if (!this.shadowRoot) return;
-        const hash = window.location.hash || '#/';
-        const links = this.shadowRoot.querySelectorAll('.nav-link');
-        links.forEach(l => l.classList.remove('active'));
-
-        const linkExplorar = this.shadowRoot.querySelector('#nav-explorar');
-        const parentLinkRegiones = this.shadowRoot.querySelector('#nav-regiones');
-        const linkAudio = this.shadowRoot.querySelector('#nav-audio');
-
-        if (hash === '#/' || hash === '' || hash.startsWith('#/destino/')) {
-            if (linkExplorar) linkExplorar.classList.add('active');
-        } else if (hash === '#/regiones' || hash.startsWith('#/region/')) {
-            if (parentLinkRegiones) parentLinkRegiones.classList.add('active');
-            this.updateActiveRegionState();
-        } else if (hash === '#/audios') {
-            if (linkAudio) linkAudio.classList.add('active');
+        const locationEl = this.shadowRoot.getElementById('location-text');
+        if (locationEl) {
+            locationEl.textContent = text || 'Costa Rica';
         }
     }
 }
