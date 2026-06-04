@@ -47,8 +47,8 @@ class MapaTuristico extends HTMLElement {
 
                     /* Estilo base para los caminos (provincias) */
                     path {
-                        fill: #e2f0ed;
-                        stroke: #ffffff;
+                        fill: #4f772d;
+                        stroke: #ECF39E;
                         stroke-width: 2.5;
                         cursor: pointer;
                         transition: 
@@ -102,9 +102,9 @@ class MapaTuristico extends HTMLElement {
                     /* Estilo para los nombres/etiquetas de las provincias */
                     .province-label {
                         font-family: system-ui, -apple-system, sans-serif;
-                        font-size: 14px;
+                        font-size: 18px;
                         font-weight: 700;
-                        fill: #4a5568;
+                        fill: #ECF39E;
                         pointer-events: none;
                         transition: fill 0.3s, font-size 0.3s, font-weight 0.3s;
                         text-anchor: middle;
@@ -120,7 +120,7 @@ class MapaTuristico extends HTMLElement {
 
                     /* Contenedor de la etiqueta para crear un fondo sutil de texto */
                     .label-bg {
-                        fill: rgba(255, 255, 255, 0.75);
+                        fill: rgba(79, 119, 45, 0.75);
                         pointer-events: none;
                         rx: 6;
                         ry: 6;

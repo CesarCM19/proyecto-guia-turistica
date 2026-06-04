@@ -48,9 +48,13 @@ main {
 
 .hero-map {
     position: relative;
-    background: #f8f9fa;
+
+    background-image: url('../assets/img/Map-bg.png');
+    background-size: cover;
+    background-position: center;
+
     border-radius: var(--border-radius-card);
-    border: 1px solid #edf2f7;
+    border: 1px solid #edf7ee;
     box-shadow: var(--shadow-soft);
     display: flex;
     flex-direction: column;
