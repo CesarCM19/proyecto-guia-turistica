@@ -225,6 +225,27 @@ class DestinoDetalle extends HTMLElement {
                     font-weight: 500;
                     border: 1px solid #edf2f7;
                 }
+                .toast {
+                    position: fixed;
+                    bottom: 100px;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(40px);
+                    background: #004d40;
+                    color: white;
+                    padding: 12px 28px;
+                    border-radius: 99px;
+                    font-weight: 600;
+                    box-shadow: 0 10px 30px rgba(0, 77, 64, 0.25);
+                    z-index: 2000;
+                    opacity: 0;
+                    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+                    pointer-events: none;
+                    font-size: 0.95rem;
+                }
+                .toast.show {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
             </style>
 
             <section class="detalle fade-in">
@@ -240,9 +261,9 @@ class DestinoDetalle extends HTMLElement {
                 </div>
 
                 <div class="mosaic-hero" role="img" aria-label="Mosaico de imágenes de ${this.destino.nombre}">
-                    <img src="${img1}" class="img-large" alt="Vista principal">
-                    <img src="${img2}" class="img-small" alt="Vista secundaria">
-                    <img src="${img3}" class="img-small" alt="Vista en detalle">
+                    <img src="${img1}" class="img-large" alt="Vista principal" loading="lazy">
+                    <img src="${img2}" class="img-small" alt="Vista secundaria" loading="lazy">
+                    <img src="${img3}" class="img-small" alt="Vista en detalle" loading="lazy">
                 </div>
 
                 <div class="pill-rating">
@@ -292,6 +313,7 @@ class DestinoDetalle extends HTMLElement {
                         </div>
                     </div>
                 </div>
+                <div class="toast" id="toast-notif"></div>
             </section>
         `;
 
@@ -301,6 +323,44 @@ class DestinoDetalle extends HTMLElement {
                 composed: true
             }));
         });
+
+        // Configurar botón compartir
+        const btnCompartir = this.shadowRoot.querySelector('button[aria-label="Compartir"]');
+        if (btnCompartir) {
+            btnCompartir.addEventListener('click', () => {
+                const shareData = {
+                    title: `Guía Pura Vida - ${this.destino.nombre}`,
+                    text: `Descubre ${this.destino.nombre} en la Guía Turística de Costa Rica.`,
+                    url: window.location.href
+                };
+                if (navigator.share) {
+                    navigator.share(shareData)
+                        .then(() => this.mostrarToast('Destino compartido'))
+                        .catch((err) => {
+                            if (err.name !== 'AbortError') {
+                                this.copiarAlPortapapeles();
+                            }
+                        });
+                } else {
+                    this.copiarAlPortapapeles();
+                }
+            });
+        }
+
+        // Configurar botón ver en el mapa
+        const btnVerMapa = this.shadowRoot.querySelector('button[aria-label="Ver en el mapa"]');
+        if (btnVerMapa) {
+            btnVerMapa.addEventListener('click', () => {
+                this.dispatchEvent(new CustomEvent('ver-en-mapa', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        id: this.destino.id,
+                        region: this.destino.region
+                    }
+                }));
+            });
+        }
 
         const btnHeart = this.shadowRoot.querySelector('.btn-heart');
         if (btnHeart) {
@@ -344,6 +404,27 @@ class DestinoDetalle extends HTMLElement {
                 videoContainer.style.display = 'none';
             }
         }
+    }
+
+    mostrarToast(mensaje) {
+        const toast = this.shadowRoot.getElementById('toast-notif');
+        if (toast) {
+            toast.textContent = mensaje;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+    }
+
+    copiarAlPortapapeles() {
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => {
+                this.mostrarToast('Enlace copiado');
+            })
+            .catch(err => {
+                console.error('Error al copiar el enlace:', err);
+            });
     }
 }
 

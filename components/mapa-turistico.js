@@ -47,8 +47,8 @@ class MapaTuristico extends HTMLElement {
 
                     /* Estilo base para los caminos (provincias) */
                     path {
-                        fill: #e2f0ed;
-                        stroke: #ffffff;
+                        fill: #4f772d;
+                        stroke: #ECF39E;
                         stroke-width: 2.5;
                         cursor: pointer;
                         transition: 
@@ -102,9 +102,9 @@ class MapaTuristico extends HTMLElement {
                     /* Estilo para los nombres/etiquetas de las provincias */
                     .province-label {
                         font-family: system-ui, -apple-system, sans-serif;
-                        font-size: 14px;
+                        font-size: 18px;
                         font-weight: 700;
-                        fill: #4a5568;
+                        fill: #ECF39E;
                         pointer-events: none;
                         transition: fill 0.3s, font-size 0.3s, font-weight 0.3s;
                         text-anchor: middle;
@@ -120,7 +120,7 @@ class MapaTuristico extends HTMLElement {
 
                     /* Contenedor de la etiqueta para crear un fondo sutil de texto */
                     .label-bg {
-                        fill: rgba(255, 255, 255, 0.75);
+                        fill: rgba(79, 119, 45, 0.75);
                         pointer-events: none;
                         rx: 6;
                         ry: 6;
@@ -298,8 +298,6 @@ class MapaTuristico extends HTMLElement {
     }
 
     deseleccionarTodo() {
-        if (this.selectedProvinceId === null) return;
-
         this.selectedProvinceId = null;
         this.removeAttribute('has-selection');
 
@@ -317,6 +315,99 @@ class MapaTuristico extends HTMLElement {
             bubbles: true,
             composed: true
         }));
+    }
+
+    resaltarProvinciasDeRegion(regionNombre) {
+        if (!regionNombre) {
+            this.deseleccionarTodo();
+            return;
+        }
+
+        const regionToProvincias = {
+            'Caribe': ['Limón'],
+            'Pacífico Norte': ['Guanacaste'],
+            'Central': ['Alajuela', 'Cartago', 'Heredia', 'San José'],
+            'Pacífico Sur': ['Puntarenas']
+        };
+
+        const provinciasResaltar = regionToProvincias[regionNombre] || [];
+
+        this.selectedProvinceId = null;
+        this.setAttribute('has-selection', '');
+
+        const svg = this.shadowRoot.querySelector('svg');
+        const featuresGroup = svg ? svg.querySelector('#features') : null;
+
+        this.provincias.forEach(prov => {
+            const name = prov.name;
+            const match = provinciasResaltar.some(p => p.toLowerCase() === name.toLowerCase());
+
+            if (match) {
+                prov.element.classList.add('selected');
+                prov.element.setAttribute('aria-pressed', 'true');
+                if (featuresGroup) {
+                    featuresGroup.appendChild(prov.element);
+                }
+            } else {
+                prov.element.classList.remove('selected');
+                prov.element.setAttribute('aria-pressed', 'false');
+            }
+        });
+
+        // Sync text labels
+        this.shadowRoot.querySelectorAll('.province-label, .label-bg').forEach(el => {
+            const id = el.getAttribute('data-id');
+            const provObj = this.provincias.find(p => p.id === id);
+            const match = provObj && provinciasResaltar.some(p => p.toLowerCase() === provObj.name.toLowerCase());
+            
+            if (match) {
+                el.classList.add('active', 'active-bg');
+            } else {
+                el.classList.remove('active', 'active-bg');
+            }
+        });
+    }
+
+    resaltarProvinciasDeGuardados(savedProvinces) {
+        if (!savedProvinces || savedProvinces.length === 0) {
+            this.deseleccionarTodo();
+            return;
+        }
+
+        this.selectedProvinceId = null;
+        this.setAttribute('has-selection', '');
+
+        const svg = this.shadowRoot.querySelector('svg');
+        const featuresGroup = svg ? svg.querySelector('#features') : null;
+
+        this.provincias.forEach(prov => {
+            const name = prov.name;
+            const match = savedProvinces.some(p => p.toLowerCase() === name.toLowerCase());
+
+            if (match) {
+                prov.element.classList.add('selected');
+                prov.element.setAttribute('aria-pressed', 'true');
+                if (featuresGroup) {
+                    featuresGroup.appendChild(prov.element);
+                }
+            } else {
+                prov.element.classList.remove('selected');
+                prov.element.setAttribute('aria-pressed', 'false');
+            }
+        });
+
+        // Sync text labels
+        this.shadowRoot.querySelectorAll('.province-label, .label-bg').forEach(el => {
+            const id = el.getAttribute('data-id');
+            const provObj = this.provincias.find(p => p.id === id);
+            const match = provObj && savedProvinces.some(p => p.toLowerCase() === provObj.name.toLowerCase());
+            
+            if (match) {
+                el.classList.add('active', 'active-bg');
+            } else {
+                el.classList.remove('active', 'active-bg');
+            }
+        });
     }
 }
 

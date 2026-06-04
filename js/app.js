@@ -148,6 +148,9 @@ function renderLista(listaFiltrada, titulo) {
     if (vistaAudios)   vistaAudios.style.display   = 'none';
     if (detalleSec)    detalleSec.style.display     = 'none';
 
+    const heroMap = document.querySelector('.hero-map');
+    if (heroMap) heroMap.style.display = 'block';
+
     cont.innerHTML = '';
 
     // Si no hay lista explícita, usar filtros del estado
@@ -196,17 +199,58 @@ function renderDetalle(id) {
 }
 
 // ==========================================
-// ROUTER BASADO EN HASH
+// CONTROL DE FONDO DE PANTALLA DINÁMICO
 // ==========================================
+function actualizarFondoPantalla() {
+    document.body.classList.remove('bg-caribe', 'bg-pacifico-norte', 'bg-central', 'bg-pacifico-sur');
+    
+    const hash = window.location.hash || '#/';
+    if (hash.startsWith('#/region/')) {
+        const slug = hash.match(/^#\/region\/(.+)$/)[1];
+        const regionNombre = slugToRegion[slug] || slug;
+        state.regionActual = regionNombre;
+    } else if (hash.startsWith('#/destino/')) {
+        const id = hash.match(/^#\/destino\/(.+)$/)[1];
+        const destino = state.destinos.find(d => d.id === id);
+        if (destino) {
+            state.regionActual = destino.region;
+        }
+    } else if (hash.startsWith('#detalle-')) {
+        const id = hash.match(/^#detalle-(.+)$/)[1];
+        const destino = state.destinos.find(d => d.id === id);
+        if (destino) {
+            state.regionActual = destino.region;
+        }
+    } else {
+        state.regionActual = null;
+    }
+
+    if (state.regionActual === 'Caribe') {
+        document.body.classList.add('bg-caribe');
+    } else if (state.regionActual === 'Pacífico Norte') {
+        document.body.classList.add('bg-pacifico-norte');
+    } else if (state.regionActual === 'Central') {
+        document.body.classList.add('bg-central');
+    } else if (state.regionActual === 'Pacífico Sur') {
+        document.body.classList.add('bg-pacifico-sur');
+    }
+}
+
 function handleRoute() {
+    actualizarFondoPantalla();
     const hash = window.location.hash || '#/';
     const appHeader = document.querySelector('app-header');
-    if (appHeader) appHeader.removeAttribute('active-region');
 
     // Formato nuevo: #/destino/:id
     if (/^#\/destino\/(.+)$/.test(hash)) {
         const id = hash.match(/^#\/destino\/(.+)$/)[1];
         renderDetalle(id);
+        const dest = state.destinos.find(d => d.id === id);
+        if (appHeader && dest) {
+            appHeader.setAttribute('location', dest.nombre);
+            appHeader.setAttribute('active-region', dest.region);
+        }
+        actualizarNavActivo(0);
         return;
     }
 
@@ -214,6 +258,12 @@ function handleRoute() {
     if (/^#detalle-(.+)$/.test(hash)) {
         const id = hash.match(/^#detalle-(.+)$/)[1];
         renderDetalle(id);
+        const dest = state.destinos.find(d => d.id === id);
+        if (appHeader && dest) {
+            appHeader.setAttribute('location', dest.nombre);
+            appHeader.setAttribute('active-region', dest.region);
+        }
+        actualizarNavActivo(0);
         return;
     }
 
@@ -222,9 +272,17 @@ function handleRoute() {
         const slug = hash.match(/^#\/region\/(.+)$/)[1];
         const regionNombre = slugToRegion[slug] || slug;
         state.regionActual = regionNombre;
-        if (appHeader) appHeader.setAttribute('active-region', regionNombre);
+        if (appHeader) {
+            appHeader.setAttribute('location', regionNombre);
+            appHeader.setAttribute('active-region', regionNombre);
+        }
         renderLista(undefined, 'Región ' + regionNombre);
         actualizarNavActivo(0);
+
+        const mapa = document.getElementById('mapa-guia');
+        if (mapa && typeof mapa.resaltarProvinciasDeRegion === 'function') {
+            mapa.resaltarProvinciasDeRegion(regionNombre);
+        }
         return;
     }
 
@@ -249,8 +307,17 @@ function handleRoute() {
     // Vista principal: #/ o vacío
     state.regionActual  = null;
     state.destinoActual = null;
+    if (appHeader) {
+        appHeader.setAttribute('location', 'Costa Rica');
+        appHeader.removeAttribute('active-region');
+    }
     renderLista(undefined, 'Destinos Destacados');
     actualizarNavActivo(0);
+
+    const mapa = document.getElementById('mapa-guia');
+    if (mapa && typeof mapa.deseleccionarTodo === 'function') {
+        mapa.deseleccionarTodo();
+    }
 }
 
 // ==========================================
@@ -262,6 +329,12 @@ function mostrarVistaRegiones() {
     const vistaAudios = document.getElementById('vista-audios');
     if (vistaAudios) vistaAudios.style.display = 'none';
     document.getElementById('vista-regiones').style.display = 'block';
+    
+    const appHeader = document.querySelector('app-header');
+    if (appHeader) {
+        appHeader.setAttribute('location', 'Regiones');
+        appHeader.removeAttribute('active-region');
+    }
     actualizarNavActivo(1);
 }
 
@@ -283,20 +356,52 @@ function mostrarVistaAudios() {
             contAudios.appendChild(audioGuia);
         });
     }
+
+    const appHeader = document.querySelector('app-header');
+    if (appHeader) {
+        appHeader.setAttribute('location', 'Audioguías');
+        appHeader.removeAttribute('active-region');
+    }
     actualizarNavActivo(2);
 }
 
 function mostrarVistaGuardados() {
     const guardados  = JSON.parse(localStorage.getItem('guardados') || '[]');
     const filtrados  = state.destinos.filter(d => guardados.includes(d.id));
+    const heroMap = document.querySelector('.hero-map');
+    const mapa = document.getElementById('mapa-guia');
+
+    const appHeader = document.querySelector('app-header');
+    if (appHeader) {
+        appHeader.setAttribute('location', 'Guardados');
+        appHeader.removeAttribute('active-region');
+    }
+
     if (filtrados.length === 0) {
+        if (heroMap) heroMap.style.display = 'none';
         renderLista([], 'Mis Destinos Guardados');
         const listaCont = document.getElementById('lista');
         if (listaCont) {
-            listaCont.innerHTML = '<p style="padding:24px;color:#718096;text-align:center;grid-column:1/-1;">Explora destinos y guárdalos presionando el ícono de corazón.</p>';
+            listaCont.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:60px 24px; color:var(--text-sec); background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #edf2f7; max-width: 600px; margin: 40px auto;" class="fade-in-slide">
+                    <div style="font-size:4rem; margin-bottom:16px; color:#e53e3e; animation: heartBeat 2s infinite;">❤️</div>
+                    <h3 style="font-size:1.5rem; color:#004d40; margin-bottom:12px;">Tu lista de guardados está vacía</h3>
+                    <p style="font-size:1rem; line-height:1.6; color:#718096; margin-bottom:24px;">
+                        Explora los increíbles destinos de Costa Rica y guarda tus favoritos presionando el ícono de corazón para tenerlos siempre a mano.
+                    </p>
+                    <button onclick="window.location.hash='#/'" style="background:#004d40; color:white; border:none; padding:12px 28px; border-radius:999px; font-weight:600; cursor:pointer; font-size:0.95rem; transition: background 0.2s;">
+                        Explorar Destinos
+                    </button>
+                </div>`;
         }
     } else {
+        if (heroMap) heroMap.style.display = 'block';
         renderLista(filtrados, 'Mis Destinos Guardados');
+        
+        const activeProvinces = filtrados.map(d => provinciaDeDestino[d.id]).filter(Boolean);
+        if (mapa && typeof mapa.resaltarProvinciasDeGuardados === 'function') {
+            mapa.resaltarProvinciasDeGuardados(activeProvinces);
+        }
     }
     actualizarNavActivo(3);
 }
@@ -495,15 +600,27 @@ setTimeout(() => {
 // ==========================================
 // APP-HEADER NAVIGATION SYNCRONIZATION
 // ==========================================
-const appHeaderElement = document.querySelector('app-header');
-if (appHeaderElement) {
-    appHeaderElement.addEventListener('nav-change', (e) => {
-        const bottomNavItems = document.querySelectorAll('.bottom-nav .nav-item');
-        if (bottomNavItems[e.detail.index]) {
-            bottomNavItems[e.detail.index].click();
+// ==========================================
+// EVENTO VER-EN-MAPA
+// ==========================================
+document.addEventListener('ver-en-mapa', (e) => {
+    const { id, region } = e.detail;
+    const slug = getSlugFromRegion(region);
+    window.location.hash = '#/region/' + slug;
+    
+    setTimeout(() => {
+        const mapa = document.getElementById('mapa-guia');
+        if (mapa) {
+            const provNombre = provinciaDeDestino[id];
+            if (provNombre) {
+                const provObj = mapa.provincias.find(p => p.name === provNombre);
+                if (provObj) {
+                    mapa.seleccionarProvincia(provObj.id);
+                }
+            }
         }
-    });
-}
+    }, 200);
+});
 
 // ==========================================
 // ROUTER: escuchar cambios de hash
