@@ -69,6 +69,20 @@ function getSlugFromRegion(region) {
     return norm;
 }
 
+function getRegionFromProvincia(provincia) {
+    if (!provincia) return null;
+    const mapping = {
+        'Limón': 'Caribe',
+        'Guanacaste': 'Pacífico Norte',
+        'Alajuela': 'Central',
+        'Cartago': 'Central',
+        'Heredia': 'Central',
+        'San José': 'Central',
+        'Puntarenas': 'Pacífico Sur'
+    };
+    return mapping[provincia] || null;
+}
+
 // ==========================================================
 // ESTADOS DE INTERFAZ: loading / error / no-results
 // ==========================================================
@@ -106,6 +120,11 @@ function renderStatus(tipo, mensaje) {
 // BUSCADOR AVANZADO (DIACRÍTICOS Y MULTI-CAMPO)
 // ==========================================================
 function getFilteredDestinos() {
+    // Limpiar motivos anteriores de coincidencia para evitar datos obsoletos
+    state.destinos.forEach(d => {
+        delete d.matchReason;
+    });
+
     return state.destinos.filter(d => {
         // 1. Filtro por Región Activa
         if (state.regionActual) {
@@ -119,8 +138,27 @@ function getFilteredDestinos() {
                 const matchNombre  = normalizar(d.nombre).includes(query);
                 const matchRegion  = normalizar(d.region).includes(query);
                 const matchDesc    = normalizar(d.descripcion).includes(query);
-                const matchAct     = (d.actividades || []).some(act => normalizar(act).includes(query));
+                
+                // Encontrar actividad que coincide
+                let actividadCoincidente = null;
+                if (d.actividades) {
+                    const encontrada = d.actividades.find(act => normalizar(act).includes(query));
+                    if (encontrada) {
+                        actividadCoincidente = encontrada;
+                    }
+                }
+                const matchAct = !!actividadCoincidente;
+
                 if (!matchNombre && !matchRegion && !matchDesc && !matchAct) return false;
+
+                // Definir motivo de coincidencia
+                if (matchAct) {
+                    d.matchReason = `🏷️ Actividad: ${actividadCoincidente}`;
+                } else if (matchRegion) {
+                    d.matchReason = `📍 Región: ${d.region}`;
+                } else if (matchDesc) {
+                    d.matchReason = `📝 Coincide en descripción`;
+                }
             }
         }
 
@@ -140,7 +178,23 @@ function renderLista(listaFiltrada, titulo) {
 
     // Título de sección
     const tituloEl = document.getElementById('titulo-seccion');
-    if (tituloEl) tituloEl.textContent = titulo || 'Destinos Destacados';
+    if (tituloEl) {
+        const text = titulo || 'Destinos Destacados';
+        tituloEl.textContent = text;
+        
+        let icon = '🌴';
+        const t = text.toLowerCase();
+        if (t.includes('búsqueda') || t.includes('busqueda')) {
+            icon = '🔍';
+        } else if (t.includes('guardados')) {
+            icon = '❤️';
+        } else if (t.includes('región') || t.includes('region') || t.includes('destinos en')) {
+            icon = '📍';
+        } else if (t.includes('destacados')) {
+            icon = '🧭';
+        }
+        tituloEl.setAttribute('data-icon', icon);
+    }
 
     // Mostrar/ocultar secciones
     if (vistaLista)    vistaLista.style.display    = 'block';
@@ -163,6 +217,9 @@ function renderLista(listaFiltrada, titulo) {
 
     lista.forEach(d => {
         const card = document.createElement('destino-card');
+        if (d.matchReason) {
+            card.setAttribute('match-reason', d.matchReason);
+        }
         card.data = d;
         cont.appendChild(card);
     });
@@ -240,6 +297,10 @@ function handleRoute() {
     actualizarFondoPantalla();
     const hash = window.location.hash || '#/';
     const appHeader = document.querySelector('app-header');
+    const mapa = document.getElementById('mapa-guia');
+    if (mapa) {
+        mapa.setAttribute('interactive', 'false');
+    }
 
     // Formato nuevo: #/destino/:id
     if (/^#\/destino\/(.+)$/.test(hash)) {
@@ -279,7 +340,6 @@ function handleRoute() {
         renderLista(undefined, 'Región ' + regionNombre);
         actualizarNavActivo(0);
 
-        const mapa = document.getElementById('mapa-guia');
         if (mapa && typeof mapa.resaltarProvinciasDeRegion === 'function') {
             mapa.resaltarProvinciasDeRegion(regionNombre);
         }
@@ -314,9 +374,11 @@ function handleRoute() {
     renderLista(undefined, 'Destinos Destacados');
     actualizarNavActivo(0);
 
-    const mapa = document.getElementById('mapa-guia');
-    if (mapa && typeof mapa.deseleccionarTodo === 'function') {
-        mapa.deseleccionarTodo();
+    if (mapa) {
+        mapa.setAttribute('interactive', 'true');
+        if (typeof mapa.deseleccionarTodo === 'function') {
+            mapa.deseleccionarTodo();
+        }
     }
 }
 
@@ -589,9 +651,20 @@ setTimeout(() => {
     const mapa = document.getElementById('mapa-guia');
     if (mapa) {
         mapa.addEventListener('provincia-seleccionada', (e) => {
+            const region = getRegionFromProvincia(e.detail.nombre);
+            const appHeader = document.querySelector('app-header');
+            if (appHeader && region) {
+                appHeader.setAttribute('location', region);
+                appHeader.setAttribute('active-region', region);
+            }
             mostrarExploradorProvincia(e.detail.id, e.detail.nombre);
         });
         mapa.addEventListener('provincia-deseleccionada', () => {
+            const appHeader = document.querySelector('app-header');
+            if (appHeader) {
+                appHeader.setAttribute('location', 'Costa Rica');
+                appHeader.removeAttribute('active-region');
+            }
             restaurarVistaLista();
         });
     }
