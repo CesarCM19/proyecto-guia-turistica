@@ -9,8 +9,8 @@
     --accent: #e3f2fd;
     --border-radius-card: 24px;
     --border-radius-pill: 999px;
-    --shadow-soft: 0 8px 30px rgba(0,0,0,0.08);
-    --shadow-hover: 0 12px 40px rgba(0,0,0,0.12);
+    --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
 * {
@@ -31,7 +31,8 @@ main {
     max-width: 1440px;
     margin: auto;
     padding: 24px 24px 100px 24px;
-    padding-top: 100px; /* Space for top-nav */
+    padding-top: 100px;
+    /* Space for top-nav */
 }
 
 /* HERO MAP EXPLORER */
@@ -204,8 +205,15 @@ main {
 }
 
 @keyframes bounce-slow {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
 }
 
 .fade-in-slide {
@@ -213,8 +221,15 @@ main {
 }
 
 @keyframes fadeInSlide {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* SEARCH BAR OVERLAY */
@@ -235,7 +250,7 @@ main {
     display: flex;
     width: 100%;
     max-width: 600px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
     align-items: center;
 }
 
@@ -268,17 +283,20 @@ main {
 .section-title {
     margin-bottom: 24px;
 }
+
 .section-title h2 {
     color: var(--primary-dark);
     font-size: 1.5rem;
     margin-bottom: 8px;
 }
+
 .section-title p {
     color: var(--text-sec);
     max-width: 600px;
     line-height: 1.5;
     margin-bottom: 20px;
 }
+
 .view-all {
     color: var(--primary-dark);
     font-weight: 600;
@@ -295,11 +313,15 @@ main {
 }
 
 @media (min-width: 768px) {
-    .destinos-grid { grid-template-columns: repeat(2, 1fr); }
+    .destinos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (min-width: 1024px) {
-    .destinos-grid { grid-template-columns: repeat(3, 1fr); }
+    .destinos-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* BOTTOM NAV */
@@ -356,8 +378,15 @@ main {
 }
 
 @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* REGIONES GRID & CARDS */
@@ -367,6 +396,7 @@ main {
     gap: 24px;
     padding: 24px;
 }
+
 .region-card {
     position: relative;
     border-radius: 24px;
@@ -374,29 +404,34 @@ main {
     height: 240px;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
+
 .region-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
+
 .region-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s;
 }
+
 .region-card:hover img {
     transform: scale(1.05);
 }
+
 .region-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,77,64,0.9) 0%, rgba(0,0,0,0) 60%);
+    background: linear-gradient(to top, rgba(0, 77, 64, 0.9) 0%, rgba(0, 0, 0, 0) 60%);
     display: flex;
     align-items: flex-end;
     padding: 24px;
 }
+
 .region-overlay h3 {
     color: white;
     margin: 0;
