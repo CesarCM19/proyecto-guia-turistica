@@ -300,7 +300,7 @@ class DestinoDetalle extends HTMLElement {
                                 ${this.destino.actividades.map(a => `<li>${a}</li>`).join('')}
                             </ul>
                         </div>
-                        <h3 style="margin-top:48px; color:#004d40; font-size:1.75rem; letter-spacing:-0.5px;">📸 Más Imágenes</h3>
+                        <h3 style="margin-top:48px; color:#004d40; font-size:1.75rem; letter-spacing:-0.5px;">Más Imágenes</h3>
                         <galeria-imagenes></galeria-imagenes>
                     </div>
 
@@ -308,7 +308,7 @@ class DestinoDetalle extends HTMLElement {
                         <audio-guia></audio-guia>
                         
                         <div id="video-section-container" style="margin-top: 32px;">
-                            <h3 style="color:#004d40; font-size:1.5rem; margin-bottom: 16px; letter-spacing:-0.5px;">🎥 Video Turístico</h3>
+                            <h3 style="color:#004d40; font-size:1.5rem; margin-bottom: 16px; letter-spacing:-0.5px;">Video Turístico</h3>
                             <video-destino></video-destino>
                         </div>
                     </div>
