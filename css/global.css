@@ -359,3 +359,47 @@ main {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* REGIONES GRID & CARDS */
+.regiones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 24px;
+}
+.region-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    height: 240px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+.region-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+.region-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s;
+}
+.region-card:hover img {
+    transform: scale(1.05);
+}
+.region-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,77,64,0.9) 0%, rgba(0,0,0,0) 60%);
+    display: flex;
+    align-items: flex-end;
+    padding: 24px;
+}
+.region-overlay h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+}

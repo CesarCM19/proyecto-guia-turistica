@@ -1,21 +1,48 @@
 class DestinoDetalle extends HTMLElement {
+    static get observedAttributes() {
+        return ['destino'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.destino = null;
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'destino' && newValue && oldValue !== newValue) {
+            try {
+                this.destino = JSON.parse(newValue);
+                this.render();
+            } catch (e) {
+                console.error("Error al parsear el atributo de destino:", e);
+            }
+        }
+    }
+
     set data(destino) {
         this.destino = destino;
         this.render();
     }
 
     render() {
+        if (!this.destino) return;
+
         const galeria = this.destino.galeria || [];
         const img1 = galeria[0] || this.destino.imagen_portada;
         const img2 = galeria[1] || this.destino.imagen_portada;
         const img3 = galeria[2] || this.destino.imagen_portada;
 
-        this.innerHTML = `
+        this.shadowRoot.innerHTML = `
             <style>
+                :host {
+                    display: block;
+                    width: 100%;
+                    font-family: system-ui, -apple-system, sans-serif;
+                }
                 .detalle {
                     max-width: 1440px;
                     margin: 0 auto;
-                    font-family: system-ui, -apple-system, sans-serif;
                 }
                 .detalle-header-top {
                     display: flex;
@@ -258,44 +285,64 @@ class DestinoDetalle extends HTMLElement {
 
                     <div class="info-sidebar">
                         <audio-guia></audio-guia>
+                        
+                        <div id="video-section-container" style="margin-top: 32px;">
+                            <h3 style="color:#004d40; font-size:1.5rem; margin-bottom: 16px; letter-spacing:-0.5px;">🎥 Video Turístico</h3>
+                            <video-destino></video-destino>
+                        </div>
                     </div>
                 </div>
             </section>
         `;
 
-        this.querySelector('.btn-volver').addEventListener('click', () => {
+        this.shadowRoot.querySelector('.btn-volver').addEventListener('click', () => {
             this.dispatchEvent(new CustomEvent('volver-lista', {
                 bubbles: true,
                 composed: true
             }));
         });
 
-        const btnHeart = this.querySelector('.btn-heart');
-        const iconGuardado = '<svg viewBox="0 0 24 24" fill="#e53e3e"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
-        const iconNoGuardado = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.1 18.55L12 18.65L11.89 18.55C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5C9.04 5 10.54 6 11.07 7.36H12.93C13.46 6 14.96 5 16.5 5C18.5 5 20 6.5 20 8.5C20 11.39 16.86 14.24 12.1 18.55ZM16.5 3C14.76 3 13.09 3.81 12 5.08C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.42 2 8.5C2 12.28 5.4 15.36 10.55 20.03L12 21.35L13.45 20.03C18.6 15.36 22 12.28 22 8.5C22 5.42 19.58 3 16.5 3Z"/></svg>';
+        const btnHeart = this.shadowRoot.querySelector('.btn-heart');
+        if (btnHeart) {
+            const iconGuardado = '<svg viewBox="0 0 24 24" fill="#e53e3e"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+            const iconNoGuardado = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.1 18.55L12 18.65L11.89 18.55C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5C9.04 5 10.54 6 11.07 7.36H12.93C13.46 6 14.96 5 16.5 5C18.5 5 20 6.5 20 8.5C20 11.39 16.86 14.24 12.1 18.55ZM16.5 3C14.76 3 13.09 3.81 12 5.08C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.42 2 8.5C2 12.28 5.4 15.36 10.55 20.03L12 21.35L13.45 20.03C18.6 15.36 22 12.28 22 8.5C22 5.42 19.58 3 16.5 3Z"/></svg>';
 
-        let guardados = JSON.parse(localStorage.getItem('guardados') || '[]');
-        btnHeart.innerHTML = guardados.includes(this.destino.id) ? iconGuardado : iconNoGuardado;
+            let guardados = JSON.parse(localStorage.getItem('guardados') || '[]');
+            btnHeart.innerHTML = guardados.includes(this.destino.id) ? iconGuardado : iconNoGuardado;
 
-        btnHeart.addEventListener('click', () => {
-            let guardadosActual = JSON.parse(localStorage.getItem('guardados') || '[]');
-            if (guardadosActual.includes(this.destino.id)) {
-                guardadosActual = guardadosActual.filter(id => id !== this.destino.id);
-                btnHeart.innerHTML = iconNoGuardado;
-            } else {
-                guardadosActual.push(this.destino.id);
-                btnHeart.innerHTML = iconGuardado;
-            }
-            localStorage.setItem('guardados', JSON.stringify(guardadosActual));
-        });
+            btnHeart.addEventListener('click', () => {
+                let guardadosActual = JSON.parse(localStorage.getItem('guardados') || '[]');
+                if (guardadosActual.includes(this.destino.id)) {
+                    guardadosActual = guardadosActual.filter(id => id !== this.destino.id);
+                    btnHeart.innerHTML = iconNoGuardado;
+                } else {
+                    guardadosActual.push(this.destino.id);
+                    btnHeart.innerHTML = iconGuardado;
+                }
+                localStorage.setItem('guardados', JSON.stringify(guardadosActual));
+            });
+        }
 
-        const galeriaEl = this.querySelector('galeria-imagenes');
-        if (this.destino.galeria) galeriaEl.setAttribute('imagenes', JSON.stringify(this.destino.galeria));
+        const galeriaEl = this.shadowRoot.querySelector('galeria-imagenes');
+        if (galeriaEl && this.destino.galeria) {
+            galeriaEl.setAttribute('imagenes', JSON.stringify(this.destino.galeria));
+        }
 
-        const audioGuiaEl = this.querySelector('audio-guia');
-        if (this.destino.audio) {
+        const audioGuiaEl = this.shadowRoot.querySelector('audio-guia');
+        if (audioGuiaEl && this.destino.audio) {
             audioGuiaEl.setAttribute('src', this.destino.audio);
             audioGuiaEl.setAttribute('label', `Guía de Audio`);
+        }
+
+        const videoDestinoEl = this.shadowRoot.querySelector('video-destino');
+        const videoContainer = this.shadowRoot.querySelector('#video-section-container');
+        if (videoDestinoEl) {
+            if (this.destino.video) {
+                videoDestinoEl.setAttribute('src', this.destino.video);
+                videoDestinoEl.setAttribute('poster', this.destino.imagen_portada || '');
+            } else if (videoContainer) {
+                videoContainer.style.display = 'none';
+            }
         }
     }
 }
