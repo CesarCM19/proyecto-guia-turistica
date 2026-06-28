@@ -6,6 +6,12 @@ class GaleriaImagenes extends HTMLElement {
         this.indiceActual = 0;
     }
 
+    connectedCallback() {
+        if (this.imagenes.length > 0) {
+            this.render();
+        }
+    }
+
     static get observedAttributes() {
         return ['imagenes'];
     }
