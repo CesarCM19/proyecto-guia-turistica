@@ -7,7 +7,7 @@
       "descripcion": "Cahuita es un pintoresco pueblo costero en el Caribe Sur de Costa Rica, famoso por su Parque Nacional que protege uno de los arrecifes de coral más importantes del país. Sus aguas cálidas y cristalinas albergan una rica vida marina, mientras que sus playas de arena oscura y vegetación exuberante ofrecen un paisaje único. La cultura afrocaribeña del lugar se refleja en su música, gastronomía y la calidez de sus habitantes.",
       "imagen_portada": "assets/img/cahuita-portada.jpg",
       "galeria": [
-        "assets/img/cahuita-1.jpg",
+        "assets/img/cahuita-1.webp",
         "assets/img/cahuita-2.jpg",
         "assets/img/cahuita-3.jpg"
       ],
@@ -54,8 +54,8 @@
       "imagen_portada": "assets/img/tamarindo-portada.jpg",
       "galeria": [
         "assets/img/tamarindo-1.jpg",
-        "assets/img/tamarindo-2.jpg",
-        "assets/img/tamarindo-3.jpg"
+        "assets/img/tamarindo-2.webp",
+        "assets/img/tamarindo-3.avif"
       ],
       "audio": "assets/audio/tamarindo-guia.mp3",
       "video": "assets/video/Tamarindo.mp4",
