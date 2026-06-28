@@ -5,8 +5,7 @@ class DestinoCard extends HTMLElement {
             'destino-id',
             'nombre',
             'imagen',
-            'region',
-            'match-reason'
+            'region'
         ];
     }
 
@@ -22,7 +21,6 @@ class DestinoCard extends HTMLElement {
             region: '',
             descripcion: ''
         };
-        this._matchReason = '';
     }
 
     connectedCallback() {
@@ -41,7 +39,6 @@ class DestinoCard extends HTMLElement {
             this.destino.region =
                 this.getAttribute('region') || '';
         }
-        this._matchReason = this.getAttribute('match-reason') || this.destino.matchReason || '';
 
         this.render();
     }
@@ -67,10 +64,6 @@ class DestinoCard extends HTMLElement {
             case 'region':
                 this.destino.region = newValue;
                 break;
-
-            case 'match-reason':
-                this._matchReason = newValue;
-                break;
         }
 
         this.render();
@@ -78,7 +71,6 @@ class DestinoCard extends HTMLElement {
 
     set data(destino) {
         this.destino = destino;
-        this._matchReason = destino.matchReason || this.getAttribute('match-reason') || '';
         this.render();
     }
 
@@ -190,26 +182,6 @@ class DestinoCard extends HTMLElement {
                     -webkit-box-orient: vertical;
                     overflow: hidden;
                 }
-                .match-badge {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 6px;
-                    margin-top: 12px;
-                    background: #f0fdf4; /* Verde muy suave */
-                    color: #166534; /* Verde bosque oscuro */
-                    border: 1px solid #bbf7d0;
-                    padding: 6px 12px;
-                    border-radius: 12px;
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-                    align-self: flex-start;
-                    animation: fadeInSlideCard 0.3s ease;
-                }
-                @keyframes fadeInSlideCard {
-                    from { opacity: 0; transform: translateY(4px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
             </style>
 
             <article class="card" aria-label="Ver detalles de ${this.destino.nombre}" tabindex="0">
@@ -227,11 +199,6 @@ class DestinoCard extends HTMLElement {
                         </div>
                     </div>
                     <p>${this.destino.descripcion}</p>
-                    ${this._matchReason ? `
-                        <div class="match-badge">
-                            ${this._matchReason}
-                        </div>
-                    ` : ''}
                 </div>
 
             </article>

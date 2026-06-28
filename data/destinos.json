@@ -12,7 +12,7 @@
         "assets/img/cahuita-3.jpg"
       ],
       "audio": "assets/audio/cahuita-guia.mp3",
-      "video": "https://vjs.zencdn.net/v/oceans.mp4",
+      "video": "assets/video/cahuita.mp4",
       "actividades": [
         "Snorkel",
         "Senderismo",
@@ -35,7 +35,7 @@
         "assets/img/puerto-viejo-3.jpg"
       ],
       "audio": "assets/audio/puerto-viejo-guia.mp3",
-      "video": "https://www.w3schools.com/html/mov_bbb.mp4",
+      "video": "assets/video/PuertoViejo.mp4",
       "actividades": [
         "Surf",
         "Ciclismo",
@@ -58,7 +58,7 @@
         "assets/img/tamarindo-3.jpg"
       ],
       "audio": "assets/audio/tamarindo-guia.mp3",
-      "video": "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
+      "video": "assets/video/Tamarindo.mp4",
       "actividades": [
         "Surf",
         "Kayak",
@@ -81,7 +81,7 @@
         "assets/img/rincon-vieja-3.jpg"
       ],
       "audio": "assets/audio/rincon-vieja-guia.mp3",
-      "video": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+      "video": "assets/video/RinconDelaVieja.mp4",
       "actividades": [
         "Canopy",
         "Aguas termales",
@@ -104,7 +104,7 @@
         "assets/img/poas-3.jpg"
       ],
       "audio": "assets/audio/poas-guia.mp3",
-      "video": "https://vjs.zencdn.net/v/oceans.mp4",
+      "video": "assets/video/Poas.mp4",
       "actividades": [
         "Observación del cráter",
         "Senderismo",
@@ -127,7 +127,7 @@
         "assets/img/orosi-3.jpg"
       ],
       "audio": "assets/audio/orosi-guia.mp3",
-      "video": "https://www.w3schools.com/html/mov_bbb.mp4",
+      "video": "assets/video/Orosii.mp4",
       "actividades": [
         "Tour de café",
         "Aguas termales",
@@ -150,7 +150,7 @@
         "assets/img/manuel-antonio-3.jpg"
       ],
       "audio": "assets/audio/manuel-antonio-guia.mp3",
-      "video": "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
+      "video": "assets/video/ManuelAntonio.mp4",
       "actividades": [
         "Avistamiento de fauna",
         "Snorkel",
@@ -173,7 +173,7 @@
         "assets/img/uvita-3.jpg"
       ],
       "audio": "assets/audio/uvita-guia.mp3",
-      "video": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+      "video": "assets/video/Uvita.mp4",
       "actividades": [
         "Avistamiento de ballenas",
         "Snorkel",

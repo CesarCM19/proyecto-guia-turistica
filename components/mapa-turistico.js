@@ -1,8 +1,4 @@
 class MapaTuristico extends HTMLElement {
-    static get observedAttributes() {
-        return ['interactive'];
-    }
-
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -12,25 +8,6 @@ class MapaTuristico extends HTMLElement {
 
     async connectedCallback() {
         await this.cargarMapa();
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'interactive' && oldValue !== newValue) {
-            this.updateInteractiveState();
-        }
-    }
-
-    updateInteractiveState() {
-        if (!this.shadowRoot) return;
-        const isInteractive = this.getAttribute('interactive') !== 'false';
-        const paths = this.shadowRoot.querySelectorAll('#features path');
-        paths.forEach(path => {
-            if (isInteractive) {
-                path.setAttribute('tabindex', '0');
-            } else {
-                path.removeAttribute('tabindex');
-            }
-        });
     }
 
     async cargarMapa() {
@@ -154,15 +131,6 @@ class MapaTuristico extends HTMLElement {
                     :host([has-selection]) .label-bg:not(.active-bg) {
                         opacity: 0.4;
                     }
-
-                    /* Desactivar interacciones cuando no es interactivo */
-                    :host([interactive="false"]) path {
-                        pointer-events: none !important;
-                        cursor: default !important;
-                    }
-                    :host([interactive="false"]) .map-container {
-                        pointer-events: none !important;
-                    }
                 </style>
                 <div class="map-container" role="application" aria-label="Mapa interactivo turístico de Costa Rica">
                     ${svgText}
@@ -206,13 +174,11 @@ class MapaTuristico extends HTMLElement {
 
                 // Eventos de interacción
                 path.addEventListener('click', (e) => {
-                    if (this.getAttribute('interactive') === 'false') return;
                     e.stopPropagation();
                     this.seleccionarProvincia(id);
                 });
 
                 path.addEventListener('keydown', (e) => {
-                    if (this.getAttribute('interactive') === 'false') return;
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         this.seleccionarProvincia(id);
@@ -278,12 +244,8 @@ class MapaTuristico extends HTMLElement {
 
         // Clic en el fondo del SVG deselecciona la provincia activa
         svg.addEventListener('click', () => {
-            if (this.getAttribute('interactive') === 'false') return;
             this.deseleccionarTodo();
         });
-
-        // Sincronizar estado inicial de interactividad
-        this.updateInteractiveState();
     }
 
     seleccionarProvincia(id) {
