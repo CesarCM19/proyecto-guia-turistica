@@ -17,7 +17,6 @@ Todas las fotografías y fondos de pantalla utilizados en este proyecto son de l
 * **Imágenes de Uvita (Marino Ballena):** Obtenidas de [Unsplash] / [Pexels]. Licencia: CC0.
 * **Fondos de Pantalla y Recursos Gráficos:** Generados y adaptados para el proyecto. Los iconos SVG son de material de diseño libre (ej. Material Design Icons).
 
-*(Nota: En caso de que el equipo haya tomado fotografías propias, los derechos pertenecen al equipo de desarrollo y se autoriza su uso para este proyecto).*
 
 ## Audio 🎧
 
