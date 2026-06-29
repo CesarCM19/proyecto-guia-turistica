@@ -7,7 +7,7 @@
       "descripcion": "Cahuita es un pintoresco pueblo costero en el Caribe Sur de Costa Rica, famoso por su Parque Nacional que protege uno de los arrecifes de coral más importantes del país. Sus aguas cálidas y cristalinas albergan una rica vida marina, mientras que sus playas de arena oscura y vegetación exuberante ofrecen un paisaje único. La cultura afrocaribeña del lugar se refleja en su música, gastronomía y la calidez de sus habitantes.",
       "imagen_portada": "assets/img/cahuita-portada.jpg",
       "galeria": [
-        "assets/img/cahuita-1.jpg",
+        "assets/img/cahuita-1.webp",
         "assets/img/cahuita-2.jpg",
         "assets/img/cahuita-3.jpg"
       ],
@@ -54,8 +54,8 @@
       "imagen_portada": "assets/img/tamarindo-portada.jpg",
       "galeria": [
         "assets/img/tamarindo-1.jpg",
-        "assets/img/tamarindo-2.jpg",
-        "assets/img/tamarindo-3.jpg"
+        "assets/img/tamarindo-2.webp",
+        "assets/img/tamarindo-3.avif"
       ],
       "audio": "assets/audio/tamarindo-guia.mp3",
       "video": "assets/video/Tamarindo.mp4",
@@ -76,7 +76,7 @@
       "descripcion": "El Parque Nacional Rincón de la Vieja alberga un volcán activo con una mística laguna cratérica de color esmeralda. El área geotérmica ofrece un paisaje de otro mundo con fumarolas, pozas de barro hirviente y aguas termales naturales. Los bosques tropicales secos que rodean el volcán son hogar de pumas, monos Congo y cientos de especies de aves. El canopy y el tubing por el río son experiencias imperdibles.",
       "imagen_portada": "assets/img/rincon-vieja-portada.jpg",
       "galeria": [
-        "assets/img/rincon-vieja-1.jpg",
+        "assets/img/rincon-vieja-1.webp",
         "assets/img/rincon-vieja-2.jpg",
         "assets/img/rincon-vieja-3.jpg"
       ],
@@ -101,7 +101,7 @@
       "galeria": [
         "assets/img/poas-1.jpg",
         "assets/img/poas-2.jpg",
-        "assets/img/poas-3.jpg"
+        "assets/img/poas-3.webp"
       ],
       "audio": "assets/audio/poas-guia.mp3",
       "video": "assets/video/Poas.mp4",
@@ -120,11 +120,11 @@
       "nombre": "Valle de Orosi",
       "region": "Central",
       "descripcion": "El Valle de Orosi es considerado uno de los valles más bellos de Costa Rica. Rodeado de montañas verdes y cafetales, el valle alberga la iglesia más antigua del país en uso continuo, construida en el siglo XVIII. Las aguas termales naturales de la zona y el embalse de Cachí ofrecen paisajes de postal. Los tours de café en las plantaciones locales permiten conocer todo el proceso de producción del famoso café costarricense.",
-      "imagen_portada": "assets/img/orosi-portada.jpg",
+      "imagen_portada": "assets/img/orosi-1.jpg",
       "galeria": [
         "assets/img/orosi-1.jpg",
         "assets/img/orosi-2.jpg",
-        "assets/img/orosi-3.jpg"
+        "assets/img/orosi-3.webp"
       ],
       "audio": "assets/audio/orosi-guia.mp3",
       "video": "assets/video/Orosii.mp4",

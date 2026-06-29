@@ -1,4 +1,8 @@
 class MapaTuristico extends HTMLElement {
+    static get observedAttributes() {
+        return ['disabled'];
+    }
+
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -8,6 +12,23 @@ class MapaTuristico extends HTMLElement {
 
     async connectedCallback() {
         await this.cargarMapa();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'disabled' && oldValue !== newValue) {
+            this.actualizarInteractividad();
+        }
+    }
+
+    actualizarInteractividad() {
+        const disabled = this.hasAttribute('disabled');
+        this.provincias.forEach(prov => {
+            if (disabled) {
+                prov.element.setAttribute('tabindex', '-1');
+            } else {
+                prov.element.setAttribute('tabindex', '0');
+            }
+        });
     }
 
     async cargarMapa() {
@@ -131,6 +152,12 @@ class MapaTuristico extends HTMLElement {
                     :host([has-selection]) .label-bg:not(.active-bg) {
                         opacity: 0.4;
                     }
+
+                    /* Desactivar interacciones si el componente está deshabilitado */
+                    :host([disabled]) path {
+                        pointer-events: none !important;
+                        cursor: default !important;
+                    }
                 </style>
                 <div class="map-container" role="application" aria-label="Mapa interactivo turístico de Costa Rica">
                     ${svgText}
@@ -167,18 +194,21 @@ class MapaTuristico extends HTMLElement {
                 this.provincias.push({ id, name, element: path });
                 
                 // Configurar accesibilidad en el path
-                path.setAttribute('tabindex', '0');
+                // Configurar accesibilidad en el path
+                path.setAttribute('tabindex', this.hasAttribute('disabled') ? '-1' : '0');
                 path.setAttribute('role', 'button');
                 path.setAttribute('aria-label', `Provincia de ${name}`);
                 path.setAttribute('aria-pressed', 'false');
 
                 // Eventos de interacción
                 path.addEventListener('click', (e) => {
+                    if (this.hasAttribute('disabled')) return;
                     e.stopPropagation();
                     this.seleccionarProvincia(id);
                 });
 
                 path.addEventListener('keydown', (e) => {
+                    if (this.hasAttribute('disabled')) return;
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         this.seleccionarProvincia(id);
@@ -244,6 +274,7 @@ class MapaTuristico extends HTMLElement {
 
         // Clic en el fondo del SVG deselecciona la provincia activa
         svg.addEventListener('click', () => {
+            if (this.hasAttribute('disabled')) return;
             this.deseleccionarTodo();
         });
     }
@@ -287,14 +318,16 @@ class MapaTuristico extends HTMLElement {
 
         // Despachar evento de selección
         const provSeleccionada = this.provincias.find(p => p.id === id);
-        this.dispatchEvent(new CustomEvent('provincia-seleccionada', {
-            detail: {
-                id: id,
-                nombre: provSeleccionada ? provSeleccionada.name : ''
-            },
-            bubbles: true,
-            composed: true
-        }));
+        if (!this.hasAttribute('disabled')) {
+            this.dispatchEvent(new CustomEvent('provincia-seleccionada', {
+                detail: {
+                    id: id,
+                    nombre: provSeleccionada ? provSeleccionada.name : ''
+                },
+                bubbles: true,
+                composed: true
+            }));
+        }
     }
 
     deseleccionarTodo() {
@@ -311,10 +344,12 @@ class MapaTuristico extends HTMLElement {
         });
 
         // Despachar evento de deselección
-        this.dispatchEvent(new CustomEvent('provincia-deseleccionada', {
-            bubbles: true,
-            composed: true
-        }));
+        if (!this.hasAttribute('disabled')) {
+            this.dispatchEvent(new CustomEvent('provincia-deseleccionada', {
+                bubbles: true,
+                composed: true
+            }));
+        }
     }
 
     resaltarProvinciasDeRegion(regionNombre) {
