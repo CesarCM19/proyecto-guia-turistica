@@ -1,44 +1,61 @@
+/**
+ * Componente Web para el Mapa Turístico Interactivo.
+ * Carga un SVG de Costa Rica y permite interactuar con sus provincias.
+ */
 class MapaTuristico extends HTMLElement {
+    // Define los atributos que el componente debe observar para reaccionar a sus cambios
     static get observedAttributes() {
         return ['disabled'];
     }
 
     constructor() {
         super();
-        this.attachShadow({ mode: 'open' });
-        this.selectedProvinceId = null;
-        this.provincias = [];
+        this.attachShadow({ mode: 'open' }); // Usamos Shadow DOM para encapsular los estilos e impedir colisiones
+        this.selectedProvinceId = null; // Almacena el ID de la provincia seleccionada actualmente
+        this.provincias = []; // Arreglo para guardar referencias a los elementos SVG de cada provincia
     }
 
+    /**
+     * Se ejecuta cuando el componente se añade al DOM.
+     */
     async connectedCallback() {
         await this.cargarMapa();
     }
 
+    /**
+     * Se ejecuta cuando un atributo observado cambia (ej: cuando se deshabilita/habilita el mapa).
+     */
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'disabled' && oldValue !== newValue) {
             this.actualizarInteractividad();
         }
     }
 
+    /**
+     * Habilita o deshabilita la navegación por teclado (tabindex) según el estado 'disabled'.
+     */
     actualizarInteractividad() {
         const disabled = this.hasAttribute('disabled');
         this.provincias.forEach(prov => {
             if (disabled) {
-                prov.element.setAttribute('tabindex', '-1');
+                prov.element.setAttribute('tabindex', '-1'); // No se puede enfocar con teclado
             } else {
-                prov.element.setAttribute('tabindex', '0');
+                prov.element.setAttribute('tabindex', '0'); // Enfocable con teclado
             }
         });
     }
 
+    /**
+     * Carga el archivo SVG del mapa y lo inyecta en el Shadow DOM junto con sus estilos.
+     */
     async cargarMapa() {
         try {
-            // Cargar el archivo SVG
+            // Cargar el archivo SVG desde la ruta de los assets
             const response = await fetch('./assets/img/mapa.svg');
             if (!response.ok) throw new Error('No se pudo cargar mapa.svg');
             
             let svgText = await response.text();
-            // Limpiar la declaración XML si existe
+            // Limpiar la declaración XML inicial si existe, para evitar problemas al inyectarlo inline en el HTML
             svgText = svgText.replace(/<\?xml[^>]*\?>/i, '');
 
             this.shadowRoot.innerHTML = `
@@ -171,18 +188,21 @@ class MapaTuristico extends HTMLElement {
         }
     }
 
+    /**
+     * Inicializa los eventos e interacciones del mapa SVG inyectado.
+     */
     inicializarComponentes() {
         const svg = this.shadowRoot.querySelector('svg');
         if (!svg) return;
 
-        // Asegurar que el SVG use viewBox para adaptabilidad
+        // Asegurar que el SVG use viewBox para ser completamente adaptativo (responsive)
         if (!svg.getAttribute('viewBox')) {
             svg.setAttribute('viewBox', '0 0 1000 1000');
         }
         svg.style.width = '100%';
         svg.style.height = 'auto';
 
-        // Obtener provincias (paths)
+        // Obtener todas las provincias (representadas por elementos <path> dentro del grupo #features)
         const paths = svg.querySelectorAll('#features path');
         
         // Cargar nombres de las provincias e inicializar interacción
@@ -279,15 +299,19 @@ class MapaTuristico extends HTMLElement {
         });
     }
 
+    /**
+     * Selecciona una provincia específica por su ID, resaltándola y emitiendo un evento.
+     * @param {string} id - El ID de la provincia en el SVG.
+     */
     seleccionarProvincia(id) {
         if (this.selectedProvinceId === id) {
-            // Si ya está seleccionada, deseleccionar
+            // Si la provincia ya está seleccionada, al hacer clic nuevamente la deselecciona (comportamiento de toggle)
             this.deseleccionarTodo();
             return;
         }
 
         this.selectedProvinceId = id;
-        this.setAttribute('has-selection', '');
+        this.setAttribute('has-selection', ''); // Atributo que sirve como hook en CSS para aplicar estilos cuando hay selección
 
         const svg = this.shadowRoot.querySelector('svg');
         const featuresGroup = svg.querySelector('#features');
@@ -330,10 +354,14 @@ class MapaTuristico extends HTMLElement {
         }
     }
 
+    /**
+     * Deselecciona cualquier provincia activa y limpia el estado visual del mapa.
+     */
     deseleccionarTodo() {
         this.selectedProvinceId = null;
-        this.removeAttribute('has-selection');
+        this.removeAttribute('has-selection'); // Quita el hook CSS de "selección activa"
 
+        // Quita la clase 'selected' de todas las provincias
         this.provincias.forEach(prov => {
             prov.element.classList.remove('selected');
             prov.element.setAttribute('aria-pressed', 'false');
@@ -352,12 +380,17 @@ class MapaTuristico extends HTMLElement {
         }
     }
 
+    /**
+     * Resalta visualmente un conjunto de provincias que pertenecen a una región.
+     * @param {string} regionNombre - El nombre de la región turística (ej: 'Central').
+     */
     resaltarProvinciasDeRegion(regionNombre) {
         if (!regionNombre) {
             this.deseleccionarTodo();
             return;
         }
 
+        // Mapeo básico de las regiones turísticas a sus provincias correspondientes
         const regionToProvincias = {
             'Caribe': ['Limón'],
             'Pacífico Norte': ['Guanacaste'],
