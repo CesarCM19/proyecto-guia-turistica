@@ -16,7 +16,8 @@ const state = {
     regionActual: null,
     destinoActual: null,
     busquedaActual: '',
-    destinos: []
+    destinos: [],
+    provinciaGuardadosActual: null // Filtro local temporal para la vista de Guardados
 };
 
 // Alias local para mantener la compatibilidad
@@ -36,6 +37,17 @@ const slugToRegion = {
     'pacifico-norte': 'Pacífico Norte',
     'central':        'Central',
     'sur':            'Pacífico Sur'
+};
+
+// Mapeo provincia → región
+const provinciaToRegion = {
+    'Limón': 'Caribe',
+    'Guanacaste': 'Pacífico Norte',
+    'Alajuela': 'Central',
+    'Cartago': 'Central',
+    'Heredia': 'Central',
+    'San José': 'Central',
+    'Puntarenas': 'Pacífico Sur'
 };
 
 // Relación de destinos y provincias geográficas de Costa Rica
@@ -240,6 +252,16 @@ function handleRoute() {
     actualizarFondoPantalla();
     const hash = window.location.hash || '#/';
     const appHeader = document.querySelector('app-header');
+    const mapa = document.getElementById('mapa-guia');
+
+    // Al cambiar de vista, limpiar cualquier selección temporal local para evitar estados residuales
+    state.provinciaGuardadosActual = null;
+
+    // Por defecto, habilitar el mapa al cambiar de ruta
+    if (mapa) {
+        mapa.removeAttribute('disabled');
+        mapa.style.pointerEvents = '';
+    }
 
     // Formato nuevo: #/destino/:id
     if (/^#\/destino\/(.+)$/.test(hash)) {
@@ -279,9 +301,12 @@ function handleRoute() {
         renderLista(undefined, 'Región ' + regionNombre);
         actualizarNavActivo(0);
 
-        const mapa = document.getElementById('mapa-guia');
-        if (mapa && typeof mapa.resaltarProvinciasDeRegion === 'function') {
-            mapa.resaltarProvinciasDeRegion(regionNombre);
+        if (mapa) {
+            mapa.setAttribute('disabled', ''); // Desactivar interactividad del mapa en la región específica
+            mapa.style.pointerEvents = 'none'; // Desactivar eventos de mouse por completo a nivel de elemento
+            if (typeof mapa.resaltarProvinciasDeRegion === 'function') {
+                mapa.resaltarProvinciasDeRegion(regionNombre);
+            }
         }
         return;
     }
@@ -314,7 +339,6 @@ function handleRoute() {
     renderLista(undefined, 'Destinos Destacados');
     actualizarNavActivo(0);
 
-    const mapa = document.getElementById('mapa-guia');
     if (mapa && typeof mapa.deseleccionarTodo === 'function') {
         mapa.deseleccionarTodo();
     }
@@ -371,15 +395,23 @@ function mostrarVistaGuardados() {
     const heroMap = document.querySelector('.hero-map');
     const mapa = document.getElementById('mapa-guia');
 
+    // Reiniciar filtro local
+    state.provinciaGuardadosActual = null;
+
     const appHeader = document.querySelector('app-header');
     if (appHeader) {
         appHeader.setAttribute('location', 'Guardados');
         appHeader.removeAttribute('active-region');
     }
 
+    // Deseleccionar cualquier provincia del mapa al entrar
+    if (mapa && typeof mapa.deseleccionarTodo === 'function') {
+        mapa.deseleccionarTodo();
+    }
+
     if (filtrados.length === 0) {
-        if (heroMap) heroMap.style.display = 'none';
         renderLista([], 'Mis Destinos Guardados');
+        if (heroMap) heroMap.style.display = 'none'; // Ocultar después de renderLista para que no lo sobrescriba
         const listaCont = document.getElementById('lista');
         if (listaCont) {
             listaCont.innerHTML = `
@@ -395,15 +427,32 @@ function mostrarVistaGuardados() {
                 </div>`;
         }
     } else {
+        renderLista(filtrados, 'Mis Destinos Guardados'); // Mostrar inicialmente todos los destinos guardados
         if (heroMap) heroMap.style.display = 'block';
-        renderLista(filtrados, 'Mis Destinos Guardados');
-        
-        const activeProvinces = filtrados.map(d => provinciaDeDestino[d.id]).filter(Boolean);
-        if (mapa && typeof mapa.resaltarProvinciasDeGuardados === 'function') {
-            mapa.resaltarProvinciasDeGuardados(activeProvinces);
-        }
     }
     actualizarNavActivo(3);
+}
+
+// Filtrar destinos guardados por provincia localmente sin modificar el estado global
+function filtrarGuardadosPorProvincia(nombreProvincia) {
+    state.provinciaGuardadosActual = nombreProvincia;
+    const guardados  = JSON.parse(localStorage.getItem('guardados') || '[]');
+    const filtrados  = state.destinos.filter(d => guardados.includes(d.id));
+    const destinosProv = filtrados.filter(d => provinciaDeDestino[d.id] === nombreProvincia);
+
+    if (destinosProv.length > 0) {
+        renderLista(destinosProv, 'Mis Destinos Guardados');
+    } else {
+        renderLista([], 'Mis Destinos Guardados');
+        const listaEl = document.getElementById('lista');
+        if (listaEl) {
+            listaEl.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 60px 24px; color: var(--text-sec); background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #edf2f7; max-width: 600px; margin: 40px auto;">
+                    <p style="font-size: 1.1rem; font-weight: 600; color: #718096;">No hay destinos guardados en esta región.</p>
+                </div>
+            `;
+        }
+    }
 }
 
 // ==========================================
@@ -589,10 +638,38 @@ setTimeout(() => {
     const mapa = document.getElementById('mapa-guia');
     if (mapa) {
         mapa.addEventListener('provincia-seleccionada', (e) => {
-            mostrarExploradorProvincia(e.detail.id, e.detail.nombre);
+            const hash = window.location.hash || '#/';
+            if (hash === '#/guardados') {
+                filtrarGuardadosPorProvincia(e.detail.nombre);
+            } else if (state.regionActual) {
+                // Si la región activa está en el estado global, sincronizarla
+                const targetRegion = provinciaToRegion[e.detail.nombre];
+                if (targetRegion) {
+                    if (targetRegion !== state.regionActual) {
+                        const slug = getSlugFromRegion(targetRegion);
+                        window.location.hash = '#/region/' + slug;
+                    } else {
+                        // Si hace clic en provincia de la misma región activa, mantener consistencia visual
+                        mapa.resaltarProvinciasDeRegion(state.regionActual);
+                    }
+                }
+            } else {
+                mostrarExploradorProvincia(e.detail.id, e.detail.nombre);
+            }
         });
         mapa.addEventListener('provincia-deseleccionada', () => {
-            restaurarVistaLista();
+            const hash = window.location.hash || '#/';
+            if (hash === '#/guardados') {
+                state.provinciaGuardadosActual = null;
+                const guardados = JSON.parse(localStorage.getItem('guardados') || '[]');
+                const filtrados = state.destinos.filter(d => guardados.includes(d.id));
+                renderLista(filtrados, 'Mis Destinos Guardados');
+            } else if (state.regionActual) {
+                // Mantener el resaltado completo de la región activa
+                mapa.resaltarProvinciasDeRegion(state.regionActual);
+            } else {
+                restaurarVistaLista();
+            }
         });
     }
 }, 150);
