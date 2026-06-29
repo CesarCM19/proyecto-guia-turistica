@@ -120,11 +120,11 @@
       "nombre": "Valle de Orosi",
       "region": "Central",
       "descripcion": "El Valle de Orosi es considerado uno de los valles más bellos de Costa Rica. Rodeado de montañas verdes y cafetales, el valle alberga la iglesia más antigua del país en uso continuo, construida en el siglo XVIII. Las aguas termales naturales de la zona y el embalse de Cachí ofrecen paisajes de postal. Los tours de café en las plantaciones locales permiten conocer todo el proceso de producción del famoso café costarricense.",
-      "imagen_portada": "assets/img/orosi-portada.jpg",
+      "imagen_portada": "assets/img/orosi-1.jpg",
       "galeria": [
         "assets/img/orosi-1.jpg",
         "assets/img/orosi-2.jpg",
-        "assets/img/orosi-3.jpg"
+        "assets/img/orosi-3.webp"
       ],
       "audio": "assets/audio/orosi-guia.mp3",
       "video": "assets/video/Orosii.mp4",
