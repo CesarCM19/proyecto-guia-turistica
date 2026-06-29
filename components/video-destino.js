@@ -1,3 +1,14 @@
+const DURACIONES_VIDEOS = {
+    'cahuita.mp4': 44,
+    'manuelantonio.mp4': 141,
+    'orosii.mp4': 57,
+    'poas.mp4': 101,
+    'puertoviejo.mp4': 104,
+    'rincondelavieja.mp4': 84,
+    'tamarindo.mp4': 112,
+    'uvita.mp4': 193
+};
+
 class VideoDestino extends HTMLElement {
     static get observedAttributes() {
         return ['src', 'poster'];
@@ -35,6 +46,23 @@ class VideoDestino extends HTMLElement {
         return `${min}:${seg.toString().padStart(2, '0')}`;
     }
 
+    obtenerDuracionEsperada() {
+        if (!this.src) return 0;
+        const filename = this.src.split('/').pop().toLowerCase();
+        return DURACIONES_VIDEOS[filename] || 0;
+    }
+
+    obtenerDuracion() {
+        const expected = this.obtenerDuracionEsperada();
+        if (expected > 0) {
+            return expected;
+        }
+        if (this.videoEl && this.videoEl.duration && !isNaN(this.videoEl.duration) && this.videoEl.duration !== Infinity) {
+            return this.videoEl.duration;
+        }
+        return 0;
+    }
+
     inicializarVideo() {
         this.videoEl = this.shadowRoot.querySelector('video');
         this.btnPlayPause = this.shadowRoot.querySelector('.btn-play-pause');
@@ -63,14 +91,27 @@ class VideoDestino extends HTMLElement {
             this.toggleMute();
         });
 
+        const updateDuration = () => {
+            const d = this.obtenerDuracion();
+            if (d > 0) {
+                this.duracion = d;
+                this.progressBar.max = d;
+                this.durationEl.textContent = this.formatearTiempo(d);
+                this.actualizarFondoProgreso();
+            }
+        };
+
+        // Set initial duration
+        updateDuration();
+
         // Native Video Event Listeners
         this.videoEl.addEventListener('loadedmetadata', () => {
-            this.duracion = this.videoEl.duration;
-            this.progressBar.max = this.duracion;
-            this.durationEl.textContent = this.formatearTiempo(this.duracion);
+            updateDuration();
             this.errorOverlay.style.display = 'none';
             if (this.playOverlayBtn) this.playOverlayBtn.style.display = 'flex';
         });
+
+        this.videoEl.addEventListener('durationchange', updateDuration);
 
         // Error handling (e.g. video file missing or network block)
         this.videoEl.addEventListener('error', () => {
@@ -82,12 +123,16 @@ class VideoDestino extends HTMLElement {
 
         // Trigger loadedmetadata manually if already loaded in cache
         if (this.videoEl.readyState >= 1) {
-            this.duracion = this.videoEl.duration;
-            this.progressBar.max = this.duracion;
-            this.durationEl.textContent = this.formatearTiempo(this.duracion);
+            updateDuration();
         }
 
         this.videoEl.addEventListener('timeupdate', () => {
+            const d = this.obtenerDuracion();
+            if (d > 0 && (this.duracion !== d || this.progressBar.max !== d)) {
+                this.duracion = d;
+                this.progressBar.max = d;
+                this.durationEl.textContent = this.formatearTiempo(d);
+            }
             if (!this.progressBar.matches(':active')) {
                 this.progressBar.value = this.videoEl.currentTime;
             }
@@ -106,7 +151,7 @@ class VideoDestino extends HTMLElement {
 
         // Progress bar drag / interaction
         this.progressBar.addEventListener('click', (e) => e.stopPropagation());
-        
+
         this.progressBar.addEventListener('input', (e) => {
             e.stopPropagation();
             this.currentTimeEl.textContent = this.formatearTiempo(e.target.value);
