@@ -17,8 +17,6 @@ Todas las fotografías y fondos de pantalla utilizados en este proyecto son de l
 * **Imágenes de Uvita (Marino Ballena):** Obtenidas de [Unsplash] / [Pexels]. Licencia: CC0.
 * **Fondos de Pantalla y Recursos Gráficos:** Generados y adaptados para el proyecto. Los iconos SVG son de material de diseño libre (ej. Material Design Icons).
 
-*(Nota: En caso de que el equipo haya tomado fotografías propias, los derechos pertenecen al equipo de desarrollo y se autoriza su uso para este proyecto).*
-
 ## Audio 🎧
 
 Las pistas de audioguía fueron generadas a través de locución y edición propia, o utilizando herramientas de síntesis de voz (Text-to-Speech) de libre uso basadas en la información descriptiva de cada destino.
@@ -28,8 +26,9 @@ Las pistas de audioguía fueron generadas a través de locución y edición prop
 ## Video 🎥
 
 Los fragmentos de video utilizados para ilustrar los destinos turísticos fueron recolectados de fuentes de dominio público y libre uso, o han sido creados para propósitos estrictamente académicos y demostrativos.
-* **Videos de destinos turísticos:** Obtenidos de [Pexels Video] / [Pixabay Video] / repositorios de dominio público. Licencia: CC0 o similar para uso educativo y no comercial.
-
+* **Videos de destinos turísticos:** Obtenidos de plataformas de stock gratuitas (Licencia CC0). 
+  - Vistas de playas y flora: [Pexels - Costa Rica](https://www.pexels.com/es-es/buscar/videos/costa%20rica/)
+  - Naturaleza y Volcanes: [Pixabay - Naturaleza](https://pixabay.com/es/videos/search/naturaleza%20costa%20rica/)
 ## Código y Herramientas 💻
 
 El proyecto ha sido desarrollado utilizando exclusivamente tecnologías web nativas (**HTML5, CSS3, JavaScript ES6+, Web Components**).
